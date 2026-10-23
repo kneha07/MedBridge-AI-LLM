@@ -21,7 +21,7 @@ function AgentDemo() {
     <div style={S.demo} role="img" aria-label="Preview of the workflow: the agent scans the payer policy, analyzes the medical record, completes the form, then waits for a reviewer to approve before submitting and tracking.">
       <div style={S.demoBar}>
         <span style={{ ...S.dot, background: '#ef4444' }} /><span style={{ ...S.dot, background: '#f59e0b' }} /><span style={{ ...S.dot, background: '#22c55e' }} />
-        <span style={{ marginLeft: 10, fontSize: 12, color: '#64748b', fontWeight: 600 }}>Lumbar MRI · Aetna · M54.30</span>
+        <span style={{ marginLeft: 10, fontSize: 13.5, color: '#cbd5e1', fontWeight: 600 }}>Example · Lumbar MRI · Aetna · M54.30</span>
       </div>
       <div style={{ padding: '10px 18px 18px' }}>
         {STEPS.map((s, k) => {
@@ -31,18 +31,19 @@ function AgentDemo() {
           const amber = s.review && (active || done);
           return (
             <div key={k} style={{
-              display: 'flex', gap: 14, alignItems: 'center', padding: '12px 0', borderBottom: k < STEPS.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
-              opacity: visible ? 1 : 0.18, transform: visible ? 'none' : 'translateY(6px)', transition: 'all .5s cubic-bezier(.22,1,.36,1)',
+              display: 'flex', gap: 14, alignItems: 'center', padding: '14px 0', borderBottom: k < STEPS.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+              opacity: visible ? 1 : 0.5, transform: visible ? 'none' : 'translateY(6px)', transition: 'all .5s cubic-bezier(.22,1,.36,1)',
             }}>
               <div style={{
-                width: 36, height: 36, borderRadius: 11, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, transition: 'all .4s',
+                width: 40, height: 40, borderRadius: 12, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 800, transition: 'all .4s',
+                color: done ? (amber ? '#fbbf24' : '#4ade80') : '#cbd5e1',
                 background: done ? (amber ? 'rgba(245,158,11,0.18)' : 'rgba(34,197,94,0.18)') : active ? (amber ? 'rgba(245,158,11,0.25)' : 'rgba(59,130,246,0.25)') : 'rgba(255,255,255,0.05)',
                 boxShadow: active ? `0 0 0 4px ${amber ? 'rgba(245,158,11,0.15)' : 'rgba(59,130,246,0.18)'}` : 'none',
                 animation: active ? 'pulseRing 1.6s infinite' : 'none',
               }}>{done && !amber ? '✓' : s.icon}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ color: '#e2e8f0', fontWeight: 700, fontSize: 14 }}>{s.title}</div>
-                <div style={{ color: amber ? '#fbbf24' : '#64748b', fontSize: 12.5, marginTop: 2 }}>{visible ? s.detail : ''}</div>
+                <div style={{ color: '#f8fafc', fontWeight: 700, fontSize: 16 }}>{s.title}</div>
+                <div style={{ color: amber ? '#fcd34d' : '#cbd5e1', fontSize: 14, marginTop: 3 }}>{visible ? s.detail : ''}</div>
               </div>
               {active && !s.review && <span style={S.spinner} />}
             </div>
