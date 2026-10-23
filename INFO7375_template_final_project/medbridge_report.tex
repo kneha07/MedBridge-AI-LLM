@@ -58,7 +58,7 @@ MedBridge addresses these gaps with two course techniques: \textbf{Knowledge Aug
 \item \textbf{Human-in-the-loop gate.} Outward-facing tools (submission) are marked as requiring approval; the agent loop blocks until a reviewer approves or rejects, and every action is written to a persisted audit trail (SQLite).
 \item \textbf{Denial-conditioned appeal loop.} After \texttt{track\_authorization\_status} returns a denial code, the agent calls \texttt{draft\_appeal}, which retrieves supporting policy text and cites it in the letter.
 \item \textbf{Cited policy chatbot.} A conversational endpoint (\texttt{/api/chat}) lets staff ask coverage and appeal questions. The model calls \texttt{search\_policy} (RAG) or a structured payer lookup, must answer only from returned passages, and the UI shows each source with an official/demo-data badge.
-\item \textbf{Vertical-plugin architecture.} Tools, prompts, form schema, and step display live in one module per vertical (healthcare, legal, finance); the runner, API, and UI are generic. The runner supports Groq (gpt-oss-120b by default; Llama 3.3 70B was originally used but is no longer served by Groq), Gemini, and Claude backends.
+\item \textbf{Vertical-plugin architecture.} Tools, prompts, form schema, and step display live in one module per vertical (healthcare, legal, finance); the runner, API, and UI are generic. The runner supports Groq (gpt-oss-120b by default; Llama 3.3 70B was originally used but is no longer served by Groq), Claude through the Anthropic API, and Claude on Amazon Bedrock, selected by one setting. The results below were obtained on Groq; Claude and Bedrock runs are planned.
 \item \textbf{Evaluation protocol} (Section~\ref{sec:method}) measuring retrieval quality, agent trajectory correctness, and citation faithfulness.
 \end{enumerate}
 
@@ -74,7 +74,7 @@ MedBridge addresses these gaps with two course techniques: \textbf{Knowledge Aug
 \node[ext] (user) at (0,0) {Clinic staff\\(React form)};
 \node[box] (api) at (4.6,0) {FastAPI\\\texttt{/workflow/submit}};
 \node[box] (loop) at (9.6,0) {Agent runner\\LLM $\to$ tool call\\$\to$ observe $\to$ repeat};
-\node[ext] (llm) at (14.6,0) {LLM provider\\Groq / Gemini / Claude};
+\node[ext] (llm) at (14.6,0) {LLM provider\\Groq / Claude / Bedrock};
 \node[box,fill=green!8] (status) at (4.6,-2.2) {Status + audit\\store (SQLite)};
 \node[box] (tools) at (9.6,-3.0) {Healthcare vertical\\6 tools};
 \node[store] (vec) at (4.6,-4.6) {ChromaDB\\policy index};

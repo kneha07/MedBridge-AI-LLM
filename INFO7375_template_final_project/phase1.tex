@@ -59,7 +59,7 @@ A general-purpose chatbot lacks current payer-specific criteria, cannot act on s
 \item a human approval gate and a persistent audit trail;
 \item a cited policy chatbot;
 \item a retrieval evaluation and a planned agent evaluation;
-\item a provider-independent runner that adds AWS Bedrock.
+\item a provider-independent runner that adds Claude (Anthropic API) and Claude on Amazon Bedrock alongside Groq.
 \end{itemize}
 
 %-------------------------------------------------------------------------
@@ -84,7 +84,7 @@ A general-purpose chatbot lacks current payer-specific criteria, cannot act on s
 \item \textbf{Human-in-the-loop gate inside the agent loop.} Outward-facing tools are marked as requiring approval. The loop blocks before such a tool runs until a reviewer approves or rejects, and every action is written to a persistent audit trail.
 \item \textbf{Denial-conditioned appeal drafting with citation.} After a denial, the agent retrieves the policy passage that states the relevant criterion (for example, the conservative-therapy requirement) and quotes it in the draft appeal, which still requires physician review.
 \item \textbf{Cited policy chatbot.} A conversational endpoint answers coverage questions only from retrieved passages, shows each source, and states when the collection does not cover a payer.
-\item \textbf{Vertical-plugin architecture.} Tools, prompts and form schema live in one module per vertical; the agent runner, API and UI are generic. The runner supports Groq, Claude and AWS Bedrock models.
+\item \textbf{Vertical-plugin architecture.} Tools, prompts and form schema live in one module per vertical; the agent runner, API and UI are generic. The runner supports Groq, Claude through the Anthropic API, and Claude on Amazon Bedrock, selected by one setting; the evaluations reported here ran on Groq, and Claude and Bedrock results are planned for Phase 2.
 \end{enumerate}
 
 %-------------------------------------------------------------------------
@@ -146,7 +146,7 @@ As a first agent check, with the approval gate auto-approved and a real MIMIC-IV
 
 \section{Plan for Phase 2}
 \begin{itemize}
-    \item By Nov 10: run the evaluation of the agent on a hosted LLM provider; fix tool-order failures.
+    \item By Nov 10: run the agent and chatbot evaluations on Claude and on Amazon Bedrock as well as Groq; fix tool-order failures.
     \item By Nov 17: extend patient data (full MIMIC-IV if credentialing is approved, otherwise Synthea) and add a hand-labeled criterion-level evaluation.
     \item By Nov 24: extend the policy corpus; build the chatbot evaluation set.
     \item By Dec 1: ablations (retrieval settings, with versus without RAG).
