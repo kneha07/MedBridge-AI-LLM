@@ -1,0 +1,35 @@
+# secrets and local state
+.env
+backend/medbridge.db
+backend/data/
+
+# build artifacts
+node_modules/
+dist/
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
+backend/rag/.chroma/
+
+# third-party policy documents are downloaded by backend/rag/build_corpus.py, not redistributed here
+backend/rag/corpus/*.md
+
+# LaTeX build files
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+*.brf
+missfont.log
+
+# course handouts, archives and large media
+Assignment_5__Domain_Specific_Chatbot*.pdf
+MedBridge_Project_Guide.pdf
+*.zip
+medbridge_demo.gif
+
+# provisional evaluation outputs (add once the runs are complete)
+backend/eval/results/
