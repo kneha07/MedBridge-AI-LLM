@@ -1,0 +1,340 @@
+[
+ {
+  "id": "aetna-spine-6wk",
+  "payer": "Aetna",
+  "question": "How many weeks of conservative therapy does Aetna require before an MRI of the spine for radiculopathy?",
+  "answerable": true,
+  "must_match": [
+   "6[\\s-]*weeks?|six[\\s-]*weeks?"
+  ],
+  "expected_sources": [
+   "CPB 0236"
+  ]
+ },
+ {
+  "id": "aetna-spine-4wk",
+  "payer": "Aetna",
+  "question": "For Aetna, how many weeks of conservative therapy are required before MRI for spondylolisthesis or degenerative spine disease?",
+  "answerable": true,
+  "must_match": [
+   "4[\\s-]*weeks?|four[\\s-]*weeks?"
+  ],
+  "expected_sources": [
+   "CPB 0236"
+  ]
+ },
+ {
+  "id": "aetna-conservative-def",
+  "payer": "Aetna",
+  "question": "What does Aetna count as conservative therapy for spine imaging?",
+  "answerable": true,
+  "must_match": [
+   "NSAID|non-?steroidal",
+   "muscle relaxant"
+  ],
+  "expected_sources": [
+   "CPB 0236"
+  ]
+ },
+ {
+  "id": "aetna-cauda",
+  "payer": "Aetna",
+  "question": "Does Aetna still require the conservative therapy waiting period if cauda equina syndrome is suspected?",
+  "answerable": true,
+  "must_match": [
+   "cauda equina"
+  ],
+  "expected_sources": [
+   "CPB 0236"
+  ]
+ },
+ {
+  "id": "aetna-hosp",
+  "payer": "Aetna",
+  "question": "Can a patient with severe back pain that requires hospitalization get a spine MRI from Aetna without waiting?",
+  "answerable": true,
+  "must_match": [
+   "hospitali[sz]"
+  ],
+  "expected_sources": [
+   "CPB 0236"
+  ]
+ },
+ {
+  "id": "aetna-knee-3wk",
+  "payer": "Aetna",
+  "question": "When does Aetna consider a knee MRI medically necessary for persistent knee pain that is not caused by an injury?",
+  "answerable": true,
+  "must_match": [
+   "3[\\s-]*weeks?|three[\\s-]*weeks?"
+  ],
+  "expected_sources": [
+   "CPB 0171"
+  ]
+ },
+ {
+  "id": "aetna-knee-xray",
+  "payer": "Aetna",
+  "question": "For an injury-related knee problem, what imaging must be done first before Aetna approves a knee MRI?",
+  "answerable": true,
+  "must_match": [
+   "x-?ray"
+  ],
+  "expected_sources": [
+   "CPB 0171"
+  ]
+ },
+ {
+  "id": "aetna-open-mri",
+  "payer": "Aetna",
+  "question": "Does Aetna cover MRI done on an open or low field strength scanner?",
+  "answerable": true,
+  "must_match": [
+   "medically necessary|without regard|regardless|cover"
+  ],
+  "expected_sources": [
+   "CPB 0093"
+  ]
+ },
+ {
+  "id": "aetna-pt-month",
+  "payer": "Aetna",
+  "question": "Within what time frame must physical therapy show improvement for Aetna to consider it medically necessary?",
+  "answerable": true,
+  "must_match": [
+   "one month|1 month|30 days"
+  ],
+  "expected_sources": [
+   "CPB 0325"
+  ]
+ },
+ {
+  "id": "aetna-pt-maint",
+  "payer": "Aetna",
+  "question": "Does Aetna cover physical therapy for a maintenance program?",
+  "answerable": true,
+  "must_match": [
+   "maintenance"
+  ],
+  "expected_sources": [
+   "CPB 0325"
+  ]
+ },
+ {
+  "id": "aetna-bmi",
+  "payer": "Aetna",
+  "question": "What BMI does Aetna require for bariatric surgery when the member has a severe co-morbidity?",
+  "answerable": true,
+  "must_match": [
+   "\\b35\\b"
+  ],
+  "expected_sources": [
+   "CPB 0157"
+  ]
+ },
+ {
+  "id": "aetna-weightloss",
+  "payer": "Aetna",
+  "question": "Does Aetna require prior weight-loss attempts or a behavioral program before obesity surgery?",
+  "answerable": true,
+  "must_match": [
+   "weight[- ]loss|behavioral"
+  ],
+  "expected_sources": [
+   "CPB 0157"
+  ]
+ },
+ {
+  "id": "cms-pacemaker",
+  "payer": "Medicare",
+  "question": "Does Medicare cover MRI for a patient with an implanted pacemaker, and under what conditions?",
+  "answerable": true,
+  "must_match": [
+   "1\\.5[\\s-]*T",
+   "lead"
+  ],
+  "expected_sources": [
+   "NCD 220.2"
+  ]
+ },
+ {
+  "id": "cms-field",
+  "payer": "Medicare",
+  "question": "What MRI field strength does Medicare require for a pacemaker patient when the device lacks FDA MRI labeling?",
+  "answerable": true,
+  "must_match": [
+   "1\\.5"
+  ],
+  "expected_sources": [
+   "NCD 220.2"
+  ]
+ },
+ {
+  "id": "bcbs-weakness",
+  "payer": "Blue Cross Blue Shield",
+  "question": "Under the Blue Cross Blue Shield of South Carolina policy, which neurologic findings support a lumbar spine MRI?",
+  "answerable": true,
+  "must_match": [
+   "weakness"
+  ],
+  "expected_sources": [
+   "CAM 709"
+  ]
+ },
+ {
+  "id": "bcbs-cauda",
+  "payer": "Blue Cross Blue Shield",
+  "question": "Is cauda equina syndrome an indication for lumbar MRI in the Blue Cross Blue Shield of South Carolina policy?",
+  "answerable": true,
+  "must_match": [
+   "cauda equina"
+  ],
+  "expected_sources": [
+   "CAM 709"
+  ]
+ },
+ {
+  "id": "bcbs-4wk",
+  "payer": "Blue Cross Blue Shield",
+  "question": "In the Blue Cross Blue Shield of South Carolina lumbar MRI policy, how long must back pain last to count as a red flag?",
+  "answerable": true,
+  "must_match": [
+   "4[\\s-]*weeks?|four[\\s-]*weeks?"
+  ],
+  "expected_sources": [
+   "CAM 709"
+  ]
+ },
+ {
+  "id": "uhc-hosp",
+  "payer": "United Healthcare",
+  "question": "When does UnitedHealthcare commercial consider an MRI at a hospital outpatient department medically necessary?",
+  "answerable": true,
+  "must_match": [
+   "clinical trial|sedation|anesthesia"
+  ],
+  "expected_sources": [
+   "MP.13.20"
+  ]
+ },
+ {
+  "id": "uhc-sedation",
+  "payer": "United Healthcare",
+  "question": "Does UnitedHealthcare accept a hospital outpatient MRI when sedation is required and no freestanding facility offers it?",
+  "answerable": true,
+  "must_match": [
+   "sedation|anesthesia"
+  ],
+  "expected_sources": [
+   "MP.13.20"
+  ]
+ },
+ {
+  "id": "uhc-asympt",
+  "payer": "United Healthcare",
+  "question": "Are diagnostic imaging services for asymptomatic people covered under UnitedHealthcare Medicare Advantage?",
+  "answerable": true,
+  "must_match": [
+   "not covered|asymptomatic"
+  ],
+  "expected_sources": [
+   "MMP076"
+  ]
+ },
+ {
+  "id": "uhc-sign",
+  "payer": "United Healthcare",
+  "question": "What must be documented for each diagnostic imaging service under UnitedHealthcare Medicare Advantage?",
+  "answerable": true,
+  "must_match": [
+   "sign|symptom|complaint"
+  ],
+  "expected_sources": [
+   "MMP076"
+  ]
+ },
+ {
+  "id": "cigna-age",
+  "payer": "Cigna",
+  "question": "Under Cigna's site-of-care policy, can a patient aged 18 or under have a hospital-based MRI?",
+  "answerable": true,
+  "must_match": [
+   "\\b18\\b"
+  ],
+  "expected_sources": [
+   "Cigna Medical Coverage Policy 0550"
+  ]
+ },
+ {
+  "id": "cigna-sedation",
+  "payer": "Cigna",
+  "question": "When does Cigna's site-of-care policy accept hospital-based imaging for a person who needs sedation?",
+  "answerable": true,
+  "must_match": [
+   "sedation"
+  ],
+  "expected_sources": [
+   "Cigna Medical Coverage Policy 0550"
+  ]
+ },
+ {
+  "id": "cigna-evicore",
+  "payer": "Cigna",
+  "question": "Which guidelines does Cigna's site-of-care policy point to for the clinical criteria of high-tech imaging?",
+  "answerable": true,
+  "must_match": [
+   "eviCore"
+  ],
+  "expected_sources": [
+   "Cigna Medical Coverage Policy 0550"
+  ]
+ },
+ {
+  "id": "na-humana",
+  "payer": "Humana",
+  "question": "What are Humana's prior authorization criteria for a lumbar spine MRI?",
+  "answerable": false,
+  "must_match": [],
+  "expected_sources": []
+ },
+ {
+  "id": "na-medicaid",
+  "payer": "Medicaid",
+  "question": "What conservative therapy does state Medicaid require before a lumbar MRI?",
+  "answerable": false,
+  "must_match": [],
+  "expected_sources": []
+ },
+ {
+  "id": "na-cigna-clinical",
+  "payer": "Cigna",
+  "question": "How many weeks of conservative therapy does Cigna require before a lumbar spine MRI?",
+  "answerable": false,
+  "must_match": [],
+  "expected_sources": []
+ },
+ {
+  "id": "na-proton",
+  "payer": "Aetna",
+  "question": "What is Aetna's policy on proton beam therapy?",
+  "answerable": false,
+  "must_match": [],
+  "expected_sources": []
+ },
+ {
+  "id": "na-approval-time",
+  "payer": "Aetna",
+  "question": "What is the average prior authorization approval time at Aetna?",
+  "answerable": false,
+  "must_match": [],
+  "expected_sources": []
+ },
+ {
+  "id": "na-cpt",
+  "payer": "Aetna",
+  "question": "What CPT code should I bill for a lumbar spine MRI without contrast?",
+  "answerable": false,
+  "must_match": [],
+  "expected_sources": []
+ }
+]
