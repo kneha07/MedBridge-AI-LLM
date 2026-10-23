@@ -6,6 +6,8 @@
 
 MedBridge is an LLM agent for clinic staff. It scans a payer's policy, analyzes the patient's records, completes the authorization form, **pauses for human approval**, then submits and tracks the request. If the payer denies it, the agent drafts an appeal that cites the retrieved policy text. A separate chatbot answers coverage questions from the same policy documents, with sources.
 
+**Model options.** The agent and the chatbot run on **Groq**, **Claude** (Anthropic API) or **Claude on Amazon Bedrock**, chosen with one setting (`AI_PROVIDER`). The evaluations so far were run on Groq; the Claude and Bedrock paths are implemented and their results are still to be added.
+
 **Status: research prototype.** Payer submission (EDI 278) and payer decisions are **simulated**; nothing is sent to a real payer. Patient records are read from the open MIMIC-IV demo (100 real, de-identified patients; hospital-admission data only). It must not be used with real patient data.
 
 ---
@@ -76,7 +78,7 @@ Agent runner ── LLM → tool call → observe → repeat
       │            (pauses at approval-required tools)
       ├── Healthcare vertical: 6 tools (patient records from the MIMIC-IV demo; payer responses simulated)
       └── RAG: ChromaDB + all-MiniLM-L6-v2 embeddings → cited policy passages
-LLM provider: Groq (default openai/gpt-oss-120b), Claude, or Gemini
+LLM provider (AI_PROVIDER): Groq (default openai/gpt-oss-120b) | Claude (Anthropic API) | Claude on Amazon Bedrock
 ```
 
 The agent runner and UI are generic; each vertical (healthcare, legal, finance) is one module of tools, prompts and form fields. Only `healthcare` is registered.
@@ -85,12 +87,14 @@ The agent runner and UI are generic; each vertical (healthcare, legal, finance) 
 
 ## Setup
 
-Prerequisites: Python 3.11+, Node 18+, a Groq API key (free tier is rate-limited, about 200k tokens/day).
+Prerequisites: Python 3.11+, Node 18+, and an API key for one provider: Groq (free tier is rate-limited, about 200k tokens/day), Anthropic (Claude), or an Amazon Bedrock API key.
 
 ```bash
 # 1. Environment — .env in the project root
 GROQ_API_KEY=your_groq_key_here
 # GROQ_MODEL=openai/gpt-oss-120b   # optional override
+# To use Claude or Bedrock instead, see .env.example (AI_PROVIDER=claude or bedrock,
+# ANTHROPIC_API_KEY / CLAUDE_MODEL, or AWS_REGION / BEDROCK_MODEL_ID / AWS_BEARER_TOKEN_BEDROCK)
 
 # 2. Backend
 cd backend
@@ -140,7 +144,7 @@ Full MIMIC-IV (needs credentialed access) or Synthea for more patients, more pay
 
 ## Built With
 
-[FastAPI](https://fastapi.tiangolo.com/) · [ChromaDB](https://www.trychroma.com/) · [sentence-transformers](https://www.sbert.net/) · [Groq](https://groq.com/) · [React](https://react.dev/) + [Vite](https://vitejs.dev/)
+[FastAPI](https://fastapi.tiangolo.com/) · [ChromaDB](https://www.trychroma.com/) · [sentence-transformers](https://www.sbert.net/) · [Groq](https://groq.com/) · [Claude](https://www.anthropic.com/claude) · [Amazon Bedrock](https://aws.amazon.com/bedrock/) · [React](https://react.dev/) + [Vite](https://vitejs.dev/)
 
 ## License
 
