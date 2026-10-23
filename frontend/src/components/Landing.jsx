@@ -77,6 +77,9 @@ export default function Landing({ onStart, onChat }) {
               </div>
             ))}
           </div>
+          <p className="fade-up-4" style={{ margin: '26px 0 0', color: '#94a3b8', fontSize: 14 }}>
+            Runs on your choice of model: Groq, Claude, or Claude on Amazon Bedrock.
+          </p>
         </div>
         <div className="fade-up-2" style={{ flex: '1 1 380px', minWidth: 300, maxWidth: 460 }}><AgentDemo /></div>
       </div>
