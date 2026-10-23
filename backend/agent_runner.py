@@ -33,8 +33,11 @@ def get_anthropic(provider: str = "claude"):
 
 
 def claude_model(provider: str = "claude") -> str:
-    """Model ID: BEDROCK_MODEL_ID on Bedrock (e.g. anthropic.claude-haiku-5-5; copy it from the Bedrock catalog)."""
-    return os.environ["BEDROCK_MODEL_ID"] if provider == "bedrock" else "claude-sonnet-4-6"
+    """Model ID. Bedrock: BEDROCK_MODEL_ID (e.g. anthropic.claude-haiku-5-5; copy it from the Bedrock catalog).
+    Claude through the Anthropic API: CLAUDE_MODEL (default claude-sonnet-5-5)."""
+    if provider == "bedrock":
+        return os.environ["BEDROCK_MODEL_ID"]
+    return os.environ.get("CLAUDE_MODEL", "claude-sonnet-5-5")
 
 
 def get_groq():
