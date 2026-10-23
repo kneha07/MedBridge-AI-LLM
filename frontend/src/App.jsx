@@ -3,6 +3,7 @@ import DemoHeader from './components/DemoHeader';
 import WorkflowForm from './components/WorkflowForm';
 import ChatPanel from './components/ChatPanel';
 import Landing from './components/Landing';
+import Icon from './components/Icon';
 import ProgressView from './components/ProgressView';
 import { HistoryPanel } from './components/ReviewPanels';
 
@@ -119,13 +120,13 @@ export default function App() {
 
       <nav style={{ display: 'flex', justifyContent: 'center', padding: '16px 12px 0' }} aria-label="Main">
         <div style={{ display: 'inline-flex', gap: 4, padding: 4, background: 'white', border: '1px solid #e2e8f0', borderRadius: 14, boxShadow: '0 2px 8px rgba(15,23,42,0.05)' }}>
-          {[['home', '🏠  Home'], ['workflow', '📋  New request'], ['chat', '💬  Ask a question'], ['history', '🕘  Past requests']].map(([id, label]) => (
+          {[['home', 'home', 'Home'], ['workflow', 'clipboard', 'New request'], ['chat', 'message', 'Ask a question'], ['history', 'clock', 'Past requests']].map(([id, icon, label]) => (
             <button key={id} className="nav-tab" onClick={() => (id === 'workflow' ? startRequest() : setMode(id))} aria-current={mode === id ? 'page' : undefined} style={{
-              border: 'none', cursor: 'pointer', padding: '9px 20px', borderRadius: 10, fontSize: 13, fontWeight: 700,
+              display: 'inline-flex', alignItems: 'center', gap: 8, border: 'none', cursor: 'pointer', padding: '10px 18px', borderRadius: 10, fontSize: 14, fontWeight: 700,
               color: mode === id ? 'white' : '#64748b',
               background: mode === id ? 'linear-gradient(135deg,#0f2240,#1a3a5c)' : 'transparent',
               boxShadow: mode === id ? '0 4px 12px rgba(15,34,64,0.25)' : 'none',
-            }}>{label}</button>
+            }}><Icon name={icon} size={17} />{label}</button>
           ))}
         </div>
       </nav>

@@ -1,4 +1,5 @@
 import { ApprovalCard, AuditTrail } from './ReviewPanels';
+import Icon from './Icon';
 
 const STEP_ORDER = ['Scanning Insurance Policy', 'Analyzing Medical Records', 'Completing Authorization Form',
   'Submitting to Payer Portal', 'Tracking Authorization', 'Drafting Appeal Letter'];
@@ -22,7 +23,7 @@ const fmt = (k, v) => (k === 'completeness_score' && typeof v === 'number') ? `$
 
 function StepIcon({ state }) {
   const base = { width: 28, height: 28, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 800 };
-  if (state === 'done') return <span aria-hidden="true" style={{ ...base, background: '#16a34a', color: 'white' }}>✓</span>;
+  if (state === 'done') return <span aria-hidden="true" style={{ ...base, background: '#16a34a', color: 'white' }}><Icon name="check" size={16} strokeWidth={3} /></span>;
   if (state === 'running') return <span aria-hidden="true" style={{ ...base, border: '3px solid #bbf7d0', borderTopColor: '#16a34a', animation: 'spin .8s linear infinite' }} />;
   return <span aria-hidden="true" style={{ ...base, background: '#e2e8f0', color: '#475569' }} />;
 }
@@ -68,12 +69,12 @@ function Step({ name, step, stopped, first }) {
 }
 
 const HEAD = {
-  pending: ['⏳', 'Preparing your request', 'MedBridge is checking the insurer\'s policy and the patient record.', '#0f172a'],
-  processing: ['⏳', 'Preparing your request', 'MedBridge is checking the insurer\'s policy and the patient record.', '#0f172a'],
-  awaiting_approval: ['✋', 'Your review is needed', 'Nothing is sent to the payer until you approve.', '#92400e'],
-  submitted: ['✓', 'Request submitted', 'Approved by a reviewer and sent. The payer\'s response is simulated in this prototype.', '#166534'],
-  rejected: ['✕', 'Not submitted', 'You rejected this request, so nothing was sent.', '#334155'],
-  needs_info: ['!', 'Stopped before finishing', null, '#991b1b'],
+  pending: ['clock', 'Preparing your request', 'MedBridge is checking the insurer\'s policy and the patient record.', '#0f172a'],
+  processing: ['clock', 'Preparing your request', 'MedBridge is checking the insurer\'s policy and the patient record.', '#0f172a'],
+  awaiting_approval: ['pause', 'Your review is needed', 'Nothing is sent to the payer until you approve.', '#92400e'],
+  submitted: ['checkcircle', 'Request submitted', 'Approved by a reviewer and sent. The payer\'s response is simulated in this prototype.', '#166534'],
+  rejected: ['x', 'Not submitted', 'You rejected this request, so nothing was sent.', '#334155'],
+  needs_info: ['alert', 'Stopped before finishing', null, '#991b1b'],
 };
 
 export default function ProgressView({ workflowData, onDecide, onStartNew }) {
@@ -89,7 +90,7 @@ export default function ProgressView({ workflowData, onDecide, onStartNew }) {
   return (
     <div style={{ maxWidth: 780, margin: '0 auto', padding: '32px 20px 56px' }}>
       <div role="status" aria-live="polite" style={{ display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 24 }}>
-        <span aria-hidden="true" style={{ fontSize: 28, lineHeight: 1.2, color }}>{icon}</span>
+        <span style={{ color, display: 'flex', paddingTop: 5 }}><Icon name={icon} size={30} /></span>
         <div>
           <h2 style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: '-0.4px', color }}>{title}</h2>
           <p style={{ margin: '6px 0 0', fontSize: 16, color: '#334155', lineHeight: 1.5 }}>{sub || workflowData?.result}</p>

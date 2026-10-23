@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 
 import Logo from './Logo';
+import Icon from './Icon';
 
 export default function DemoHeader({ onReset, onHome, vertical }) {
   const [scrolled, setScrolled] = useState(false);
@@ -115,7 +116,7 @@ export default function DemoHeader({ onReset, onHome, vertical }) {
               e.currentTarget.style.borderColor = 'rgba(255,255,255,0.13)';
             }}
           >
-            <span style={{ fontSize: '14px' }}>↩</span> New Request
+            <Icon name="arrow-left" size={15} /> New request
           </button>
         )}
       </div>

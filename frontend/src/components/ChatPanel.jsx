@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
+import Icon from './Icon';
+import Logo from './Logo';
 
 const API = 'http://localhost:8000';
 
 const SUGGESTIONS = [
-  { icon: '🩻', text: 'Does Aetna need conservative therapy before a lumbar MRI, and are there exceptions?' },
-  { icon: '📄', text: 'What documents are required for an Aetna MRI prior authorization?' },
-  { icon: '⚖️', text: 'How long does Cigna usually take to approve an MRI?' },
-  { icon: '✍️', text: 'My MRI request was denied for lack of conservative treatment. What should the appeal cite?' },
+  { icon: 'search', text: 'Does Aetna need conservative therapy before a lumbar MRI, and are there exceptions?' },
+  { icon: 'file', text: 'What documents are required for an Aetna MRI prior authorization?' },
+  { icon: 'scale', text: 'How long does Cigna usually take to approve an MRI?' },
+  { icon: 'edit', text: 'My MRI request was denied for lack of conservative treatment. What should the appeal cite?' },
 ];
 
 const TOOL_LABELS = { search_policy: 'Searched policy documents', get_payer_requirements: 'Looked up payer requirements' };
@@ -42,7 +44,7 @@ function Sources({ citations, tools }) {
       {tools.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: citations.length ? 8 : 0 }}>
           {[...new Set(tools)].map(t => (
-            <span key={t} style={styles.toolChip}>⚙ {TOOL_LABELS[t] || t}</span>
+            <span key={t} style={{ ...styles.toolChip, display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="search" size={13} />{TOOL_LABELS[t] || t}</span>
           ))}
         </div>
       )}
@@ -106,7 +108,7 @@ export default function ChatPanel() {
       <div style={styles.thread} role="log" aria-live="polite" aria-label="Conversation">
         {empty && (
           <div className="fade-up" style={{ textAlign: 'center', padding: '36px 0 8px' }}>
-            <div className="float" style={styles.hero}>⚕️</div>
+            <div className="float" style={{ display: 'flex', justifyContent: 'center' }}><Logo size={68} /></div>
             <h2 style={{ fontSize: 28, fontWeight: 900, letterSpacing: '-0.6px', color: '#0f172a', margin: '18px 0 8px' }}>
               Ask about prior authorization
             </h2>
@@ -116,7 +118,7 @@ export default function ChatPanel() {
             <div style={styles.grid}>
               {SUGGESTIONS.map((s, i) => (
                 <button key={i} className={`fade-up-${i + 1}`} style={styles.suggest} onClick={() => send(s.text)}>
-                  <span style={{ fontSize: 20 }}>{s.icon}</span>
+                  <span style={{ color: '#2563eb', display: 'flex', paddingTop: 2 }}><Icon name={s.icon} size={22} /></span>
                   <span style={{ textAlign: 'left' }}>{s.text}</span>
                 </button>
               ))}
@@ -126,7 +128,7 @@ export default function ChatPanel() {
 
         {messages.map((m, i) => (
           <div key={i} className="slide-in" style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start', gap: 10 }}>
-            {m.role === 'assistant' && <div style={styles.avatar}>⚕️</div>}
+            {m.role === 'assistant' && <Logo size={36} />}
             <div style={m.role === 'user' ? styles.userBubble : { ...styles.botBubble, ...(m.error ? styles.errorBubble : {}) }}>
               <span className="sr-only">{m.role === 'user' ? 'You asked: ' : 'MedBridge answered: '}</span>
               {m.role === 'user' ? m.content : renderReply(m.content, m.citations || [])}
@@ -137,7 +139,7 @@ export default function ChatPanel() {
 
         {loading && (
           <div className="fade-in" style={{ display: 'flex', gap: 10 }}>
-            <div style={styles.avatar}>⚕️</div>
+            <Logo size={36} />
             <div style={{ ...styles.botBubble, display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={styles.dots}><i /><i /><i /></span>
               <span role="status" style={{ color: '#475569', fontSize: 13 }}>Searching policies…</span>

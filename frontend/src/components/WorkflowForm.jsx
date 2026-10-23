@@ -1,4 +1,5 @@
 import { cloneElement, useId, useState } from 'react';
+import Icon from './Icon';
 
 function Field({ label, required, children }) {
   const id = useId();
@@ -111,7 +112,7 @@ export default function WorkflowForm({ vertical, onSubmit, onBack, loading }) {
                 background: `${vertical.color}25`, border: `1.5px solid ${vertical.color}50`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px',
                 boxShadow: `0 0 20px ${palette.shadow}`,
-              }}>{vertical.icon}</div>
+              }}><Icon name="clipboard" size={24} color={vertical.color} /></div>
               <div>
                 <h2 style={{ margin: '0 0 5px', color: 'white', fontSize: '20px', fontWeight: '900', letterSpacing: '-0.4px' }}>{vertical.name}</h2>
                 <p style={{ margin: 0, color: '#7dd3fc', fontSize: '13px' }}>Fill this in once. MedBridge prepares it and shows you the result to approve.</p>
@@ -129,7 +130,7 @@ export default function WorkflowForm({ vertical, onSubmit, onBack, loading }) {
               onMouseEnter={e => { e.currentTarget.style.background = `${vertical.color}35`; e.currentTarget.style.transform = 'translateY(-1px)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = `${vertical.color}20`; e.currentTarget.style.transform = 'none'; }}
             >
-              ✨ Try Demo
+              <Icon name="sparkle" size={16} /> Try Demo
             </button>
           </div>
         </div>
@@ -176,8 +177,8 @@ export default function WorkflowForm({ vertical, onSubmit, onBack, loading }) {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               {[
-                { v: false, label: 'Standard Approval',    sub: 'Auth submitted and approved',          icon: '✅', color: '#15803d', bg: '#f0fdf4', border: '#86efac' },
-                { v: true,  label: 'Denial + Auto-Appeal', sub: 'Denied → MedBridge files appeal',      icon: '⚡', color: '#b45309', bg: '#fffbeb', border: '#fde68a' },
+                { v: false, label: 'Standard Approval',    sub: 'Auth submitted and approved',          icon: 'checkcircle', color: '#15803d', bg: '#f0fdf4', border: '#86efac' },
+                { v: true,  label: 'Denial + Auto-Appeal', sub: 'Denied → MedBridge files appeal',      icon: 'bolt', color: '#b45309', bg: '#fffbeb', border: '#fde68a' },
               ].map(opt => (
                 <label key={String(opt.v)} style={{
                   display: 'flex', alignItems: 'center', gap: '14px',
@@ -191,13 +192,13 @@ export default function WorkflowForm({ vertical, onSubmit, onBack, loading }) {
                 }}>
                   <input type="radio" name="denial_demo" checked={denialDemo === opt.v}
                     onChange={() => setDenialDemo(opt.v)} className="sr-only" />
-                  <span style={{ fontSize: '22px' }}>{opt.icon}</span>
+                  <span style={{ color: opt.color, display: 'flex' }}><Icon name={opt.icon} size={26} /></span>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '15.5px', fontWeight: '800', color: denialDemo === opt.v ? opt.color : '#1e293b' }}>{opt.label}</div>
                     <div style={{ fontSize: '13.5px', color: '#475569', marginTop: '2px' }}>{opt.sub}</div>
                   </div>
                   {denialDemo === opt.v && (
-                    <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: opt.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: 'white', fontWeight: '800', flexShrink: 0 }}>✓</div>
+                    <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: opt.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: 'white', fontWeight: '800', flexShrink: 0 }}><Icon name="check" size={12} strokeWidth={3.5} /></div>
                   )}
                 </label>
               ))}

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+import Icon from './Icon';
 
 const STEPS = [
-  { icon: '📚', title: 'Scan payer policy', detail: 'Aetna CPB 0236 · 3 passages cited', ms: 1300 },
-  { icon: '🩺', title: 'Analyze medical records', detail: 'Diagnoses and medications read from the record', ms: 1300 },
-  { icon: '📝', title: 'Complete authorization form', detail: 'All required fields filled', ms: 1300 },
-  { icon: '✋', title: 'Waiting for reviewer approval', detail: 'Nothing is sent until a person approves', ms: 1900, review: true },
-  { icon: '📤', title: 'Submit & track', detail: 'Confirmation number assigned', ms: 1400 },
+  { icon: 'book', title: 'Scan payer policy', detail: 'Aetna CPB 0236 · 3 passages cited', ms: 1300 },
+  { icon: 'user', title: 'Analyze medical records', detail: 'Diagnoses and medications read from the record', ms: 1300 },
+  { icon: 'file', title: 'Complete authorization form', detail: 'All required fields filled', ms: 1300 },
+  { icon: 'pause', title: 'Waiting for reviewer approval', detail: 'Nothing is sent until a person approves', ms: 1900, review: true },
+  { icon: 'send', title: 'Submit & track', detail: 'Confirmation number assigned', ms: 1400 },
 ];
 
 function AgentDemo() {
@@ -40,7 +41,7 @@ function AgentDemo() {
                 background: done ? (amber ? 'rgba(245,158,11,0.18)' : 'rgba(34,197,94,0.18)') : active ? (amber ? 'rgba(245,158,11,0.25)' : 'rgba(59,130,246,0.25)') : 'rgba(255,255,255,0.05)',
                 boxShadow: active ? `0 0 0 4px ${amber ? 'rgba(245,158,11,0.15)' : 'rgba(59,130,246,0.18)'}` : 'none',
                 animation: active ? 'pulseRing 1.6s infinite' : 'none',
-              }}>{done && !amber ? '✓' : s.icon}</div>
+              }}><Icon name={done && !amber ? 'check' : s.icon} size={20} strokeWidth={done && !amber ? 3 : 2} /></div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ color: '#f8fafc', fontWeight: 700, fontSize: 16 }}>{s.title}</div>
                 <div style={{ color: amber ? '#fcd34d' : '#cbd5e1', fontSize: 14, marginTop: 3 }}>{visible ? s.detail : ''}</div>
@@ -60,7 +61,7 @@ export default function Landing({ onStart, onChat }) {
       <div className="drift" style={S.glow1} aria-hidden="true" /><div className="drift" style={{ ...S.glow2, animationDelay: '-7s' }} aria-hidden="true" />
       <div style={S.inner}>
         <div style={S.copy}>
-          <div className="fade-up" style={S.pill}><span aria-hidden="true" style={{ marginRight: 2 }}>🏆</span>1st place · AI Agents Hackathon · solo build</div>
+          <div className="fade-up" style={S.pill}><Icon name="trophy" size={15} />1st place · AI Agents Hackathon · solo build</div>
           <h1 className="fade-up-1" style={S.h1}>
             Prior authorizations,<br /><span className="gradient-text">ready to review.</span>
           </h1>
