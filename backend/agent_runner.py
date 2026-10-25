@@ -18,14 +18,14 @@ _bedrock_client = None
 _groq_client = None
 
 def get_anthropic(provider: str = "claude"):
-    """Anthropic SDK client: first-party, or Amazon Bedrock through the Messages-API ("Mantle") endpoint.
+    """Anthropic SDK client: first-party, or Amazon Bedrock through the standard bedrock-runtime endpoint.
 
     Bedrock reads the key from AWS_BEARER_TOKEN_BEDROCK (or standard AWS credentials) and the region from AWS_REGION.
     """
     global _anthropic_client, _bedrock_client
     if provider == "bedrock":
         if _bedrock_client is None:
-            _bedrock_client = anthropic.AnthropicBedrockMantle(aws_region=os.environ.get("AWS_REGION", "us-east-1"))
+            _bedrock_client = anthropic.AnthropicBedrock(aws_region=os.environ.get("AWS_REGION", "us-east-1"))
         return _bedrock_client
     if _anthropic_client is None:
         _anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
@@ -33,7 +33,7 @@ def get_anthropic(provider: str = "claude"):
 
 
 def claude_model(provider: str = "claude") -> str:
-    """Model ID. Bedrock: BEDROCK_MODEL_ID (e.g. anthropic.claude-haiku-5-5; copy it from the Bedrock catalog).
+    """Model ID. Bedrock: BEDROCK_MODEL_ID (an inference profile ID such as us.anthropic.claude-sonnet-4-6; see Infer > Inference profiles in the Bedrock console).
     Claude through the Anthropic API: CLAUDE_MODEL (default claude-sonnet-5-5)."""
     if provider == "bedrock":
         return os.environ["BEDROCK_MODEL_ID"]

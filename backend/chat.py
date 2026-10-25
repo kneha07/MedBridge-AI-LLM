@@ -48,7 +48,7 @@ def _complete(messages):
 
 
 def _claude_chat(history: list[dict], provider: str) -> dict:
-    """Same loop through the Anthropic Messages API (first-party or Bedrock Mantle). UNTESTED on Bedrock until credentials exist."""
+    """Same loop through the Anthropic Messages API (first-party or Bedrock). Tested on Bedrock with us.anthropic.claude-sonnet-4-6."""
     from agent_runner import claude_model, get_anthropic
     client = get_anthropic(provider)
     tools = [{"name": t["function"]["name"], "description": t["function"]["description"],

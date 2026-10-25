@@ -6,7 +6,7 @@
 
 MedBridge is an LLM agent for clinic staff. It scans a payer's policy, analyzes the patient's records, completes the authorization form, **pauses for human approval**, then submits and tracks the request. If the payer denies it, the agent drafts an appeal that cites the retrieved policy text. A separate chatbot answers coverage questions from the same policy documents, with sources.
 
-**Model options.** The agent and the chatbot run on **Groq**, **Claude** (Anthropic API) or **Claude on Amazon Bedrock**, chosen with one setting (`AI_PROVIDER`). The evaluations so far were run on Groq; the Claude and Bedrock paths are implemented and their results are still to be added.
+**Model options.** The agent and the chatbot run on **Groq**, **Claude** (Anthropic API) or **Claude on Amazon Bedrock**, chosen with one setting (`AI_PROVIDER`). The evaluations so far were run on Groq; the Claude and Bedrock paths are implemented. The Bedrock path (`us.anthropic.claude-sonnet-4-6`) has only been smoke-tested (one agent run per scenario, three chat questions, no errors), so full results are still to be added.
 
 **Status: research prototype.** Payer submission (EDI 278) and payer decisions are **simulated**; nothing is sent to a real payer. Patient records are read from the open MIMIC-IV demo (100 real, de-identified patients; hospital-admission data only). It must not be used with real patient data.
 
@@ -63,7 +63,7 @@ Downloaded from the publishers by `python -m rag.build_corpus` (source URL and r
 
 **Real denial cases** (`python -m eval.imr_eval`, open data from the [California Department of Managed Health Care](https://data.chhs.ca.gov), run `--download` first): of 64 independent medical reviews where a lumbar-spine MRI was requested, 33 (52%) overturned the plan's denial. Using only the case description as the query, retrieval returned a spine-MRI policy at rank 1 for 94% of cases and in the top 3 for 63/64 (chance is about 67% at rank 5). Relevance is topic-level, not criterion-level.
 
-The questions were written by the author after reading the documents and the corpus is small, so treat this as a sanity check, not a benchmark. `python -m eval.agent_eval --provider groq --runs 10` checks that the agent produces the expected tool sequence (auto-approving the review step). On the current version (approval gate auto-approved, real MIMIC demo patient, real policy corpus) with `openai/gpt-oss-120b` on Groq, 5 of 5 runs in each scenario (standard approval; denial with appeal) produced the expected tool sequence with no errors, and the appeal cited Aetna CPB 0236. Five runs is a small sample, and an earlier 3-run pilot on a previous version once skipped the submission step. Bedrock results are pending.
+The questions were written by the author after reading the documents and the corpus is small, so treat this as a sanity check, not a benchmark. `python -m eval.agent_eval --provider groq --runs 10` checks that the agent produces the expected tool sequence (auto-approving the review step). On the current version (approval gate auto-approved, real MIMIC demo patient, real policy corpus) with `openai/gpt-oss-120b` on Groq, 5 of 5 runs in each scenario (standard approval; denial with appeal) produced the expected tool sequence with no errors, and the appeal cited Aetna CPB 0236. Five runs is a small sample, and an earlier 3-run pilot on a previous version once skipped the submission step. A single Bedrock run (Claude Sonnet 4.6) of the denial-with-appeal scenario produced the expected tool sequence with no errors and cited Aetna CPB 0236; full Bedrock results are pending.
 
 ---
 
@@ -94,7 +94,7 @@ Prerequisites: Python 3.11+, Node 18+, and an API key for one provider: Groq (fr
 GROQ_API_KEY=your_groq_key_here
 # GROQ_MODEL=openai/gpt-oss-120b   # optional override
 # To use Claude or Bedrock instead, see .env.example (AI_PROVIDER=claude or bedrock,
-# ANTHROPIC_API_KEY / CLAUDE_MODEL, or AWS_REGION / BEDROCK_MODEL_ID / AWS_BEARER_TOKEN_BEDROCK)
+# ANTHROPIC_API_KEY / CLAUDE_MODEL, or AWS_REGION / BEDROCK_MODEL_ID / AWS_BEARER_TOKEN_BEDROCK; use the inference profile ID, e.g. us.anthropic.claude-sonnet-4-6)
 
 # 2. Backend
 cd backend
