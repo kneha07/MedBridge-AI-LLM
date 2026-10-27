@@ -36,7 +36,8 @@ def _run_tool(name: str, args: dict, citations: dict) -> dict:
         hits = store.search(args.get("query", ""), k=4, payer=args.get("payer") or None)
         for h in hits:
             citations.setdefault(h["title"], {"title": h["title"], "url": h["source"],
-                                              "synthetic": h["synthetic"], "score": h["score"]})
+                                              "synthetic": h["synthetic"], "score": h["score"],
+                                              "passage": h["text"]})
         return {"passages": [{"title": h["title"], "synthetic": h["synthetic"], "text": h["text"]} for h in hits]}
     return {"error": f"unknown tool {name}"}
 

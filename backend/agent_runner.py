@@ -78,6 +78,10 @@ async def _fire_callback(tool_name: str, status: str, vertical, result: dict | N
                 if len(summary) >= 5:
                     break
 
+        if result and result.get("policy_evidence"):
+            summary["policy_passages"] = [{"source": e["source"], "url": e.get("url", ""), "passage": e["passage"][:1200]}
+                                          for e in result["policy_evidence"]]
+
         await callback(AgentStep(
             tool_name=display_name,
             status=StepStatus.done,
