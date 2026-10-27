@@ -10,8 +10,8 @@ const STEPS = [
 ];
 
 const STATS = [
-  { n: '94%', t: 'of physicians say prior authorization delays necessary care.', s: 'AMA survey, 2024' },
-  { n: '12 hrs', t: 'of staff time per physician each week, across about 43 requests.', s: 'AMA survey, 2024' },
+  { n: '94%', t: 'of physicians say prior authorization delays necessary care.', s: 'AMA survey, published 2024' },
+  { n: '12 hrs', t: 'of physician and staff time each week, across an average of 43 requests.', s: 'AMA survey, published 2024' },
   { n: '80.7%', t: 'of appealed Medicare Advantage denials were overturned, yet only 11.5% of denials were appealed.', s: 'KFF, 2024 data' },
 ];
 
