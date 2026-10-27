@@ -1,13 +1,18 @@
 import { cloneElement, useId, useState } from 'react';
 import Icon from './Icon';
+import MicButton from './MicButton';
+import { voiceSupported } from './speech';
 
-function Field({ label, required, children }) {
+function Field({ label, required, action, children }) {
   const id = useId();
   return (
     <div>
-      <label htmlFor={id} style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#3f3f46', marginBottom: '6px' }}>
-        {label}{required && <span aria-hidden="true" style={{ color: '#b91c1c', marginLeft: '3px' }}>*</span>}
-      </label>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: '6px', minHeight: 22 }}>
+        <label htmlFor={id} style={{ fontSize: '14px', fontWeight: '600', color: '#3f3f46' }}>
+          {label}{required && <span aria-hidden="true" style={{ color: '#b91c1c', marginLeft: '3px' }}>*</span>}
+        </label>
+        {action}
+      </div>
       {cloneElement(children, { id, 'aria-required': required || undefined })}
     </div>
   );
@@ -64,6 +69,9 @@ export default function WorkflowForm({ vertical, onSubmit, onBack, loading }) {
   const [denialDemo, setDenialDemo] = useState(false);
 
   const upd = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
+  const dictate = (k) => (t) => setForm(f => ({ ...f, [k]: f[k] ? `${f[k]} ${t}` : t }));
+  // Free-text fields only; IDs, codes and numbers are better typed.
+  const canDictate = (f) => f.type === 'textarea' || /name|^requesting_physician$/i.test(f.key);
   const loadDemo = () => setForm({ ...initialForm, ...vertical.demo_data, demo_scenario: denialDemo ? 'Denial + Auto-Appeal' : 'Standard Approval' });
 
   const visibleFields = vertical.form_fields.filter(f => !HIDDEN_FIELDS.includes(f.key));
@@ -110,7 +118,7 @@ export default function WorkflowForm({ vertical, onSubmit, onBack, loading }) {
             </button>
           </div>
           <div style={{ marginTop: 14, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {['Simulated payer', 'MIMIC-IV demo data', 'Do not enter real patient data'].map(t => (
+            {['Simulated payer', 'MIMIC-IV demo data', 'Do not enter real patient data', ...(voiceSupported ? ['Dictation uses your browser speech service'] : [])].map(t => (
               <span key={t} style={{ fontSize: 12, fontWeight: 700, color: '#52525b', background: 'white', border: '1px solid #e7e5e4', borderRadius: 100, padding: '3px 10px' }}>{t}</span>
             ))}
           </div>
@@ -122,7 +130,7 @@ export default function WorkflowForm({ vertical, onSubmit, onBack, loading }) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
             {visibleFields.map(f => (
               <div key={f.key} style={{ gridColumn: f.type === 'textarea' ? '1 / -1' : 'auto' }}>
-                <Field label={f.label} required={f.required}>
+                <Field label={f.label} required={f.required} action={canDictate(f) ? <MicButton label={f.label} onText={dictate(f.key)} /> : null}>
                   {f.type === 'select' ? (
                     <SelectField value={form[f.key] || ''} onChange={upd(f.key)} options={f.options} />
                   ) : f.type === 'textarea' ? (
