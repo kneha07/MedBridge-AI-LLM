@@ -119,12 +119,12 @@ export default function App() {
       <DemoHeader onHome={() => setMode('home')} onReset={mode === 'workflow' && view !== 'select' ? handleReset : null} vertical={mode === 'workflow' ? vertical : null} />
 
       <nav style={{ display: 'flex', justifyContent: 'center', padding: '16px 12px 0' }} aria-label="Main">
-        <div style={{ display: 'inline-flex', gap: 4, padding: 4, background: 'white', border: '1px solid #e2e8f0', borderRadius: 14, boxShadow: '0 2px 8px rgba(15,23,42,0.05)' }}>
+        <div style={{ display: 'inline-flex', gap: 4, padding: 4, background: 'white', border: '1px solid #e7e5e4', borderRadius: 14, boxShadow: '0 2px 8px rgba(15,23,42,0.05)' }}>
           {[['home', 'home', 'Home'], ['workflow', 'clipboard', 'New request'], ['chat', 'message', 'Ask a question'], ['history', 'clock', 'Past requests']].map(([id, icon, label]) => (
             <button key={id} className="nav-tab" onClick={() => (id === 'workflow' ? startRequest() : setMode(id))} aria-current={mode === id ? 'page' : undefined} style={{
               display: 'inline-flex', alignItems: 'center', gap: 8, border: 'none', cursor: 'pointer', padding: '10px 18px', borderRadius: 10, fontSize: 14, fontWeight: 700,
-              color: mode === id ? 'white' : '#64748b',
-              background: mode === id ? 'linear-gradient(135deg,#0f2240,#1a3a5c)' : 'transparent',
+              color: mode === id ? 'white' : '#71717a',
+              background: mode === id ? 'linear-gradient(135deg,#17171d,#2a2a33)' : 'transparent',
               boxShadow: mode === id ? '0 4px 12px rgba(15,34,64,0.25)' : 'none',
             }}><Icon name={icon} size={17} />{label}</button>
           ))}
@@ -141,7 +141,7 @@ export default function App() {
 
       {/* ── VERTICAL SELECTOR ── */}
       {view === 'select' && (
-        <div role="status" style={{ textAlign: 'center', padding: '80px 24px', color: '#475569', fontSize: 15 }}>
+        <div role="status" style={{ textAlign: 'center', padding: '80px 24px', color: '#52525b', fontSize: 15 }}>
           {verticals.length ? 'Opening the request form…' : 'Connecting to the server… If this stays, check that the backend is running.'}
         </div>
       )}

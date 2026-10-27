@@ -23,11 +23,11 @@ const TREATMENT_TYPES = [
 ];
 
 const AI_STEPS = [
-  { icon: '🔍', label: 'Scan policy requirements', color: '#8b5cf6' },
-  { icon: '📋', label: 'Analyze medical records', color: '#3b82f6' },
+  { icon: '🔍', label: 'Scan policy requirements', color: '#0891b2' },
+  { icon: '📋', label: 'Analyze medical records', color: '#0d9488' },
   { icon: '📝', label: 'Auto-fill auth form', color: '#f59e0b' },
   { icon: '📤', label: 'Submit to insurer', color: '#22c55e' },
-  { icon: '🔔', label: 'Track until decision', color: '#06b6d4' },
+  { icon: '🔔', label: 'Track until decision', color: '#0891b2' },
 ];
 
 function SectionTitle({ number, title, icon }) {
@@ -36,7 +36,7 @@ function SectionTitle({ number, title, icon }) {
       <div style={{
         width: '26px', height: '26px',
         borderRadius: '8px',
-        background: 'linear-gradient(135deg, #1a3a5c, #1e4d7b)',
+        background: 'linear-gradient(135deg, #2a2a33, #1e4d7b)',
         color: 'white',
         fontSize: '11px', fontWeight: '800',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -44,7 +44,7 @@ function SectionTitle({ number, title, icon }) {
         boxShadow: '0 2px 8px rgba(26,58,92,0.3)',
       }}>{number}</div>
       <span style={{
-        fontSize: '11px', fontWeight: '700', color: '#475569',
+        fontSize: '11px', fontWeight: '700', color: '#52525b',
         textTransform: 'uppercase', letterSpacing: '1.1px'
       }}>
         {icon && <span style={{ marginRight: '5px' }}>{icon}</span>}
@@ -60,14 +60,14 @@ function Field({ label, required, hint, children }) {
       <label style={{
         display: 'block',
         fontSize: '11px', fontWeight: '700',
-        color: '#64748b', marginBottom: '7px',
+        color: '#71717a', marginBottom: '7px',
         letterSpacing: '0.6px', textTransform: 'uppercase',
       }}>
         {label}
         {required && <span style={{ color: '#ef4444', marginLeft: '3px' }} aria-hidden="true">*</span>}
       </label>
       {children}
-      {hint && <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '5px' }}>{hint}</p>}
+      {hint && <p style={{ fontSize: '11px', color: '#a1a1aa', marginTop: '5px' }}>{hint}</p>}
     </div>
   );
 }
@@ -85,11 +85,11 @@ function Input({ value, onChange, placeholder, type = 'text', required, ariaLabe
       onBlur={() => setFocused(false)}
       style={{
         width: '100%', padding: '11px 14px',
-        border: `1.5px solid ${focused ? '#3b82f6' : '#e2e8f0'}`,
+        border: `1.5px solid ${focused ? '#0d9488' : '#e7e5e4'}`,
         borderRadius: '10px',
-        fontSize: '14px', color: '#0f172a',
-        background: focused ? '#fafbff' : '#fff',
-        boxShadow: focused ? '0 0 0 3px rgba(59,130,246,0.12), 0 2px 8px rgba(0,0,0,0.04)' : '0 1px 3px rgba(0,0,0,0.04)',
+        fontSize: '14px', color: '#18181b',
+        background: focused ? '#fbfaf9' : '#fff',
+        boxShadow: focused ? '0 0 0 3px rgba(13,148,136,0.12), 0 2px 8px rgba(0,0,0,0.04)' : '0 1px 3px rgba(0,0,0,0.04)',
         transition: 'all 0.2s',
       }}
     />
@@ -106,11 +106,11 @@ function Select({ value, onChange, children, ariaLabel }) {
       onBlur={() => setFocused(false)}
       style={{
         width: '100%', padding: '11px 14px',
-        border: `1.5px solid ${focused ? '#3b82f6' : '#e2e8f0'}`,
+        border: `1.5px solid ${focused ? '#0d9488' : '#e7e5e4'}`,
         borderRadius: '10px',
-        fontSize: '14px', color: '#0f172a',
-        background: focused ? '#fafbff' : '#fff',
-        boxShadow: focused ? '0 0 0 3px rgba(59,130,246,0.12)' : '0 1px 3px rgba(0,0,0,0.04)',
+        fontSize: '14px', color: '#18181b',
+        background: focused ? '#fbfaf9' : '#fff',
+        boxShadow: focused ? '0 0 0 3px rgba(13,148,136,0.12)' : '0 1px 3px rgba(0,0,0,0.04)',
         transition: 'all 0.2s',
         appearance: 'none',
         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24'%3E%3Cpath fill='%2394a3b8' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E")`,
@@ -145,12 +145,12 @@ export default function AuthForm({ onSubmit, loading }) {
 
           {/* Card header with gradient */}
           <div style={{
-            background: 'linear-gradient(135deg, #0a1628 0%, #1a3a5c 50%, #0e2d4a 100%)',
+            background: 'linear-gradient(135deg, #0e0e12 0%, #2a2a33 50%, #0e2d4a 100%)',
             padding: '28px 36px',
             position: 'relative', overflow: 'hidden',
           }}>
             {/* Decorative orbs */}
-            <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '160px', height: '160px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.15), transparent 70%)' }} />
+            <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '160px', height: '160px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(13,148,136,0.15), transparent 70%)' }} />
             <div style={{ position: 'absolute', bottom: '-20px', left: '40%', width: '100px', height: '100px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(34,197,94,0.1), transparent 70%)' }} />
 
             <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -158,7 +158,7 @@ export default function AuthForm({ onSubmit, loading }) {
                 <h2 style={{ margin: '0 0 6px', color: 'white', fontSize: '20px', fontWeight: '900', letterSpacing: '-0.4px' }}>
                   Prior Authorization Request
                 </h2>
-                <p style={{ margin: 0, color: '#7dd3fc', fontSize: '13px', fontWeight: '400' }}>
+                <p style={{ margin: 0, color: '#5eead4', fontSize: '13px', fontWeight: '400' }}>
                   Fill once — AI handles everything else
                 </p>
               </div>
@@ -181,7 +181,7 @@ export default function AuthForm({ onSubmit, loading }) {
                 }}
                 onMouseEnter={e => {
                   e.currentTarget.style.background = 'rgba(34,197,94,0.25)';
-                  e.currentTarget.style.boxShadow = '0 0 24px rgba(34,197,94,0.35)';
+                  e.currentTarget.style.boxShadow = '0 0 24px rgba(24,24,27,0.28)';
                   e.currentTarget.style.transform = 'translateY(-1px)';
                 }}
                 onMouseLeave={e => {
@@ -202,7 +202,7 @@ export default function AuthForm({ onSubmit, loading }) {
           >
 
             {/* 1. Patient */}
-            <section aria-labelledby="section-patient" style={{ marginBottom: '32px', paddingBottom: '28px', borderBottom: '1px solid #f1f5f9' }}>
+            <section aria-labelledby="section-patient" style={{ marginBottom: '32px', paddingBottom: '28px', borderBottom: '1px solid #f5f5f4' }}>
               <SectionTitle number="1" title="Patient Information" icon="👤" />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <Field label="Full Name" required>
@@ -218,7 +218,7 @@ export default function AuthForm({ onSubmit, loading }) {
             </section>
 
             {/* 2. Insurance */}
-            <section aria-labelledby="section-insurance" style={{ marginBottom: '32px', paddingBottom: '28px', borderBottom: '1px solid #f1f5f9' }}>
+            <section aria-labelledby="section-insurance" style={{ marginBottom: '32px', paddingBottom: '28px', borderBottom: '1px solid #f5f5f4' }}>
               <SectionTitle number="2" title="Insurance Details" icon="🛡️" />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <Field label="Insurance Provider">
@@ -233,7 +233,7 @@ export default function AuthForm({ onSubmit, loading }) {
             </section>
 
             {/* 3. Treatment */}
-            <section aria-labelledby="section-treatment" style={{ marginBottom: '32px', paddingBottom: '28px', borderBottom: '1px solid #f1f5f9' }}>
+            <section aria-labelledby="section-treatment" style={{ marginBottom: '32px', paddingBottom: '28px', borderBottom: '1px solid #f5f5f4' }}>
               <SectionTitle number="3" title="Treatment Request" icon="🏥" />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                 <Field label="Treatment Type">
@@ -255,19 +255,19 @@ export default function AuthForm({ onSubmit, loading }) {
                   aria-required="true"
                   style={{
                     width: '100%', padding: '11px 14px',
-                    border: '1.5px solid #e2e8f0', borderRadius: '10px',
-                    fontSize: '14px', color: '#0f172a', resize: 'vertical',
+                    border: '1.5px solid #e7e5e4', borderRadius: '10px',
+                    fontSize: '14px', color: '#18181b', resize: 'vertical',
                     lineHeight: '1.6', transition: 'all 0.2s',
                     boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
                   }}
-                  onFocus={e => { e.target.style.borderColor = '#3b82f6'; e.target.style.boxShadow = '0 0 0 3px rgba(59,130,246,0.12)'; }}
-                  onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'; }}
+                  onFocus={e => { e.target.style.borderColor = '#0d9488'; e.target.style.boxShadow = '0 0 0 3px rgba(13,148,136,0.12)'; }}
+                  onBlur={e => { e.target.style.borderColor = '#e7e5e4'; e.target.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'; }}
                 />
               </Field>
             </section>
 
             {/* 4. Physician */}
-            <section aria-labelledby="section-physician" style={{ marginBottom: '32px', paddingBottom: '28px', borderBottom: '1px solid #f1f5f9' }}>
+            <section aria-labelledby="section-physician" style={{ marginBottom: '32px', paddingBottom: '28px', borderBottom: '1px solid #f5f5f4' }}>
               <SectionTitle number="4" title="Requesting Physician" icon="👨‍⚕️" />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <Field label="Physician Name" required>
@@ -284,7 +284,7 @@ export default function AuthForm({ onSubmit, loading }) {
               <SectionTitle number="5" title="Urgency Level" icon="⏱️" />
               <div role="radiogroup" aria-label="Urgency level" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
                 {[
-                  { v: 'routine',   label: 'Routine',   desc: '3–5 business days', color: '#3b82f6', bg: '#eff6ff', border: '#bfdbfe', icon: '🔵' },
+                  { v: 'routine',   label: 'Routine',   desc: '3–5 business days', color: '#0d9488', bg: '#eff6ff', border: '#bfdbfe', icon: '🔵' },
                   { v: 'urgent',    label: 'Urgent',    desc: '24–72 hours',        color: '#f59e0b', bg: '#fffbeb', border: '#fde68a', icon: '🟡' },
                   { v: 'emergency', label: 'Emergency', desc: 'Immediate review',   color: '#ef4444', bg: '#fef2f2', border: '#fca5a5', icon: '🔴' }
                 ].map(opt => (
@@ -293,7 +293,7 @@ export default function AuthForm({ onSubmit, loading }) {
                     style={{
                       display: 'flex', flexDirection: 'column', alignItems: 'center',
                       padding: '16px 12px',
-                      border: `2px solid ${form.urgency === opt.v ? opt.color : '#e8edf3'}`,
+                      border: `2px solid ${form.urgency === opt.v ? opt.color : '#ece9e6'}`,
                       borderRadius: '14px',
                       cursor: 'pointer',
                       background: form.urgency === opt.v ? opt.bg : 'white',
@@ -303,7 +303,7 @@ export default function AuthForm({ onSubmit, loading }) {
                       transform: form.urgency === opt.v ? 'translateY(-1px)' : 'none',
                     }}
                     onMouseEnter={e => { if (form.urgency !== opt.v) e.currentTarget.style.borderColor = opt.color + '80'; }}
-                    onMouseLeave={e => { if (form.urgency !== opt.v) e.currentTarget.style.borderColor = '#e8edf3'; }}
+                    onMouseLeave={e => { if (form.urgency !== opt.v) e.currentTarget.style.borderColor = '#ece9e6'; }}
                   >
                     <input type="radio" name="urgency" value={opt.v}
                       checked={form.urgency === opt.v}
@@ -312,10 +312,10 @@ export default function AuthForm({ onSubmit, loading }) {
                       aria-label={`${opt.label} - ${opt.desc}`}
                     />
                     <span style={{ fontSize: '20px', marginBottom: '6px' }}>{opt.icon}</span>
-                    <span style={{ fontSize: '13px', fontWeight: '700', color: form.urgency === opt.v ? opt.color : '#475569' }}>
+                    <span style={{ fontSize: '13px', fontWeight: '700', color: form.urgency === opt.v ? opt.color : '#52525b' }}>
                       {opt.label}
                     </span>
-                    <span style={{ fontSize: '11px', color: '#94a3b8', marginTop: '3px', textAlign: 'center' }}>
+                    <span style={{ fontSize: '11px', color: '#a1a1aa', marginTop: '3px', textAlign: 'center' }}>
                       {opt.desc}
                     </span>
                   </label>
@@ -336,7 +336,7 @@ export default function AuthForm({ onSubmit, loading }) {
                     style={{
                       display: 'flex', alignItems: 'center', gap: '14px',
                       padding: '16px 18px',
-                      border: `2px solid ${form.ai_provider === opt.v ? opt.color : '#e8edf3'}`,
+                      border: `2px solid ${form.ai_provider === opt.v ? opt.color : '#ece9e6'}`,
                       borderRadius: '14px',
                       cursor: 'pointer',
                       background: form.ai_provider === opt.v ? opt.bg : 'white',
@@ -346,7 +346,7 @@ export default function AuthForm({ onSubmit, loading }) {
                       transform: form.ai_provider === opt.v ? 'translateY(-1px)' : 'none',
                     }}
                     onMouseEnter={e => { if (form.ai_provider !== opt.v) e.currentTarget.style.borderColor = opt.color + '60'; }}
-                    onMouseLeave={e => { if (form.ai_provider !== opt.v) e.currentTarget.style.borderColor = '#e8edf3'; }}
+                    onMouseLeave={e => { if (form.ai_provider !== opt.v) e.currentTarget.style.borderColor = '#ece9e6'; }}
                   >
                     <input type="radio" name="ai_provider" value={opt.v}
                       checked={form.ai_provider === opt.v}
@@ -356,10 +356,10 @@ export default function AuthForm({ onSubmit, loading }) {
                     />
                     <span style={{ fontSize: '26px' }}>{opt.logo}</span>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '15px', fontWeight: '800', color: form.ai_provider === opt.v ? opt.color : '#1e293b' }}>
+                      <div style={{ fontSize: '15px', fontWeight: '800', color: form.ai_provider === opt.v ? opt.color : '#27272a' }}>
                         {opt.label}
                       </div>
-                      <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>{opt.sub}</div>
+                      <div style={{ fontSize: '11px', color: '#a1a1aa', marginTop: '2px' }}>{opt.sub}</div>
                     </div>
                     {form.ai_provider === opt.v && (
                       <div style={{
@@ -384,8 +384,8 @@ export default function AuthForm({ onSubmit, loading }) {
               style={{
                 width: '100%', padding: '16px',
                 background: loading
-                  ? '#94a3b8'
-                  : 'linear-gradient(135deg, #1a3a5c 0%, #1e4d7b 60%, #2563eb 100%)',
+                  ? '#a1a1aa'
+                  : 'linear-gradient(135deg, #2a2a33 0%, #1e4d7b 60%, #2563eb 100%)',
                 backgroundSize: '200% 200%',
                 color: 'white', border: 'none',
                 borderRadius: '14px', fontSize: '15px', fontWeight: '800',
@@ -437,7 +437,7 @@ export default function AuthForm({ onSubmit, loading }) {
 
           {/* What happens next */}
           <div className="fade-up-1 card" style={{ padding: '24px', borderRadius: '20px' }}>
-            <div style={{ fontSize: '10px', fontWeight: '700', color: '#94a3b8', letterSpacing: '1.2px', textTransform: 'uppercase', marginBottom: '18px' }}>
+            <div style={{ fontSize: '10px', fontWeight: '700', color: '#a1a1aa', letterSpacing: '1.2px', textTransform: 'uppercase', marginBottom: '18px' }}>
               What happens next
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
@@ -457,13 +457,13 @@ export default function AuthForm({ onSubmit, loading }) {
                     {i < AI_STEPS.length - 1 && (
                       <div style={{
                         width: '2px', height: '22px',
-                        background: 'linear-gradient(to bottom, #e2e8f0, transparent)',
+                        background: 'linear-gradient(to bottom, #e7e5e4, transparent)',
                         margin: '4px 0'
                       }} />
                     )}
                   </div>
                   <div style={{ paddingTop: '9px', paddingBottom: i < AI_STEPS.length - 1 ? '0' : '0' }}>
-                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>{step.label}</div>
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#27272a' }}>{step.label}</div>
                   </div>
                 </div>
               ))}
@@ -472,22 +472,22 @@ export default function AuthForm({ onSubmit, loading }) {
 
           {/* Stats */}
           <div className="fade-up-2" style={{
-            background: 'linear-gradient(135deg, #0a1628 0%, #1a3a5c 100%)',
+            background: 'linear-gradient(135deg, #0e0e12 0%, #2a2a33 100%)',
             borderRadius: '20px',
             padding: '24px',
             color: 'white',
             boxShadow: '0 8px 32px rgba(10,22,40,0.4), inset 0 1px 0 rgba(255,255,255,0.07)',
             position: 'relative', overflow: 'hidden',
           }}>
-            <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '140px', height: '140px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.12), transparent 70%)' }} />
-            <div style={{ fontSize: '10px', fontWeight: '700', color: '#7dd3fc', letterSpacing: '1.2px', textTransform: 'uppercase', marginBottom: '18px' }}>
+            <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '140px', height: '140px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(13,148,136,0.12), transparent 70%)' }} />
+            <div style={{ fontSize: '10px', fontWeight: '700', color: '#5eead4', letterSpacing: '1.2px', textTransform: 'uppercase', marginBottom: '18px' }}>
               MedBridge Impact
             </div>
             {[
               { icon: '⚡', label: 'Minutes, not weeks',     color: '#22c55e' },
-              { icon: '🤖', label: 'Zero manual steps',      color: '#60a5fa' },
+              { icon: '🤖', label: 'Zero manual steps',      color: '#2dd4bf' },
               { icon: '🔒', label: 'HIPAA compliant',        color: '#f59e0b' },
-              { icon: '📋', label: 'CMS compliant 2026',     color: '#a78bfa' },
+              { icon: '📋', label: 'CMS compliant 2026',     color: '#2dd4bf' },
             ].map(({ icon, label, color }) => (
               <div key={label} style={{
                 display: 'flex', alignItems: 'center', gap: '10px',
@@ -504,16 +504,16 @@ export default function AuthForm({ onSubmit, loading }) {
           <div className="fade-up-3 card" style={{
             padding: '18px',
             borderRadius: '16px',
-            background: 'linear-gradient(135deg, #f0fdf4, #f8fafc)',
+            background: 'linear-gradient(135deg, #f0fdf4, #fafaf9)',
             border: '1.5px solid #d1fae5',
           }}>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
               <div style={{
                 width: '40px', height: '40px', borderRadius: '12px',
-                background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+                background: 'linear-gradient(180deg,#2a2a31,#0e0e12)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: '18px', flexShrink: 0,
-                boxShadow: '0 4px 12px rgba(34,197,94,0.3)',
+                boxShadow: '0 4px 12px rgba(24,24,27,0.28)',
               }}>🔒</div>
               <div>
                 <div style={{ fontSize: '13px', fontWeight: '800', color: '#15803d', marginBottom: '4px' }}>HIPAA Compliant</div>

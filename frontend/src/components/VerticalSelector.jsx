@@ -7,15 +7,15 @@ export default function VerticalSelector({ verticals, onSelect }) {
 
       {/* Hero */}
       <div style={{
-        background: 'linear-gradient(150deg, #060e1a 0%, #0a1628 35%, #0f2240 70%, #0a1f38 100%)',
+        background: 'linear-gradient(150deg, #09090c 0%, #0e0e12 35%, #17171d 70%, #0a1f38 100%)',
         padding: '80px 24px 100px',
         textAlign: 'center', color: 'white',
         position: 'relative', overflow: 'hidden', flex: '0 0 auto',
       }}>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(13,148,136,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(13,148,136,0.04) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
         <div style={{ position: 'absolute', top: '5%',  left: '8%',  width: '380px', height: '380px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(34,197,94,0.07), transparent 70%)' }} />
-        <div style={{ position: 'absolute', top: '-5%', right: '5%', width: '320px', height: '320px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.09), transparent 70%)' }} />
-        <div style={{ position: 'absolute', bottom: '-5%', left: '45%', width: '280px', height: '280px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.07), transparent 70%)' }} />
+        <div style={{ position: 'absolute', top: '-5%', right: '5%', width: '320px', height: '320px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(13,148,136,0.09), transparent 70%)' }} />
+        <div style={{ position: 'absolute', bottom: '-5%', left: '45%', width: '280px', height: '280px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(8,145,178,0.07), transparent 70%)' }} />
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: '720px', margin: '0 auto' }}>
           {/* Badge */}
@@ -40,14 +40,14 @@ export default function VerticalSelector({ verticals, onSelect }) {
           }}>
             The Agent Layer for{' '}
             <span style={{
-              background: 'linear-gradient(135deg, #22c55e, #60a5fa)',
+              background: 'linear-gradient(135deg, #38bdf8, #0891b2)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
             }}>Healthcare Admin</span>
           </h1>
 
           <p className="fade-up-2" style={{
             margin: '0 auto 20px', maxWidth: '540px',
-            fontSize: '17px', color: '#7dd3fc',
+            fontSize: '17px', color: '#5eead4',
             lineHeight: 1.65, fontWeight: '400',
           }}>
             MedBridge sits on top of your existing EHR and payer systems — operating them autonomously so your staff doesn't have to.
@@ -78,9 +78,9 @@ export default function VerticalSelector({ verticals, onSelect }) {
           }}>
             {[
               { icon: '⚡', label: 'Minutes, not days',   color: '#22c55e' },
-              { icon: '🔗', label: 'Cited payer policies', color: '#60a5fa' },
+              { icon: '🔗', label: 'Cited payer policies', color: '#2dd4bf' },
               { icon: '🔒', label: 'Human review step', color: '#f59e0b' },
-              { icon: '⚖️',  label: 'Auto-appeal denials', color: '#a78bfa' },
+              { icon: '⚖️',  label: 'Auto-appeal denials', color: '#2dd4bf' },
             ].map(({ icon, label, color }, i, arr) => (
               <div key={label} style={{
                 flex: '1 1 0', minWidth: '130px', padding: '20px 16px',
@@ -100,7 +100,7 @@ export default function VerticalSelector({ verticals, onSelect }) {
         flex: 1, maxWidth: '1100px', margin: '-48px auto 0',
         padding: '0 24px 64px', position: 'relative', zIndex: 2, width: '100%',
       }}>
-        <p className="fade-up" style={{ textAlign: 'center', fontSize: '12px', fontWeight: '700', color: '#94a3b8', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '24px', marginTop: '0' }}>
+        <p className="fade-up" style={{ textAlign: 'center', fontSize: '12px', fontWeight: '700', color: '#a1a1aa', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '24px', marginTop: '0' }}>
           Choose a workflow to automate
         </p>
 
@@ -111,7 +111,7 @@ export default function VerticalSelector({ verticals, onSelect }) {
 
         {/* Skeletons if no verticals yet */}
         {verticals.length === 0 && (
-          <div style={{ height: '300px', borderRadius: '24px', background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)', animation: 'pulse 1.5s infinite' }} />
+          <div style={{ height: '300px', borderRadius: '24px', background: 'linear-gradient(135deg, #fafaf9, #f5f5f4)', animation: 'pulse 1.5s infinite' }} />
         )}
 
         {/* Coming soon — healthcare workflows */}
@@ -126,10 +126,10 @@ export default function VerticalSelector({ verticals, onSelect }) {
               opacity: 0.55, cursor: 'default', borderStyle: 'dashed',
             }}>
               <div style={{ fontSize: '36px', marginBottom: '14px' }}>{v.icon}</div>
-              <div style={{ fontSize: '18px', fontWeight: '800', color: '#1e293b', marginBottom: '6px' }}>{v.name}</div>
-              <div style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '16px', lineHeight: 1.55 }}>{v.desc}</div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#f1f5f9', padding: '5px 12px', borderRadius: '100px' }}>
-                <span style={{ fontSize: '10px', fontWeight: '700', color: '#64748b', letterSpacing: '0.8px', textTransform: 'uppercase' }}>Coming Soon</span>
+              <div style={{ fontSize: '18px', fontWeight: '800', color: '#27272a', marginBottom: '6px' }}>{v.name}</div>
+              <div style={{ fontSize: '13px', color: '#a1a1aa', marginBottom: '16px', lineHeight: 1.55 }}>{v.desc}</div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#f5f5f4', padding: '5px 12px', borderRadius: '100px' }}>
+                <span style={{ fontSize: '10px', fontWeight: '700', color: '#71717a', letterSpacing: '0.8px', textTransform: 'uppercase' }}>Coming Soon</span>
               </div>
             </div>
           ))}
@@ -137,15 +137,15 @@ export default function VerticalSelector({ verticals, onSelect }) {
 
         {/* Integration logos */}
         <div style={{ marginTop: '48px', textAlign: 'center' }}>
-          <p style={{ fontSize: '11px', fontWeight: '700', color: '#cbd5e1', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '16px' }}>
+          <p style={{ fontSize: '11px', fontWeight: '700', color: '#d4d4d8', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '16px' }}>
             Production integration targets (simulated in this prototype)
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '12px' }}>
             {['Aetna NaviNet', 'BCBS Availity', 'Epic EHR', 'UHC Portal', 'CoverMyMeds', 'Waystar'].map(name => (
               <div key={name} style={{
-                background: 'white', border: '1px solid #e2e8f0',
+                background: 'white', border: '1px solid #e7e5e4',
                 borderRadius: '10px', padding: '8px 16px',
-                fontSize: '12px', fontWeight: '700', color: '#475569',
+                fontSize: '12px', fontWeight: '700', color: '#52525b',
                 boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
               }}>
                 🔗 {name}
@@ -198,14 +198,14 @@ function HeroCard({ vertical, onSelect }) {
             }}>{vertical.icon}</div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                <span style={{ fontSize: '22px', fontWeight: '900', color: '#0f172a', letterSpacing: '-0.4px' }}>{vertical.name}</span>
+                <span style={{ fontSize: '22px', fontWeight: '900', color: '#18181b', letterSpacing: '-0.4px' }}>{vertical.name}</span>
                 <span style={{
                   fontSize: '10px', fontWeight: '800', color: '#16a34a',
                   background: '#dcfce7', border: '1px solid #86efac',
                   padding: '3px 10px', borderRadius: '100px', letterSpacing: '0.8px', textTransform: 'uppercase',
                 }}>⭐ Most Popular</span>
               </div>
-              <p style={{ margin: 0, fontSize: '14px', color: '#64748b', lineHeight: 1.5 }}>{vertical.description}</p>
+              <p style={{ margin: 0, fontSize: '14px', color: '#71717a', lineHeight: 1.5 }}>{vertical.description}</p>
             </div>
           </div>
 
@@ -223,16 +223,16 @@ function HeroCard({ vertical, onSelect }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: '0 0 auto', minWidth: '200px' }}>
           {[
             { label: 'With MedBridge', value: 'Minutes', sub: 'fully automated end-to-end', color: '#22c55e' },
-            { label: 'Denial auto-appeal', value: 'Automatic', sub: 'clinical evidence included', color: '#8b5cf6' },
-            { label: 'Payer integrations', value: 'EDI 278', sub: 'Aetna, BCBS, UHC, Cigna', color: '#3b82f6' },
+            { label: 'Denial auto-appeal', value: 'Automatic', sub: 'clinical evidence included', color: '#0891b2' },
+            { label: 'Payer integrations', value: 'EDI 278', sub: 'Aetna, BCBS, UHC, Cigna', color: '#0d9488' },
           ].map(({ label, value, sub, color }) => (
             <div key={label} style={{
-              background: '#f8fafc', borderRadius: '12px', padding: '12px 16px',
-              border: '1px solid #e8edf3',
+              background: '#fafaf9', borderRadius: '12px', padding: '12px 16px',
+              border: '1px solid #ece9e6',
             }}>
-              <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: '4px' }}>{label}</div>
+              <div style={{ fontSize: '10px', color: '#a1a1aa', fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: '4px' }}>{label}</div>
               <div style={{ fontSize: '18px', fontWeight: '900', color, marginBottom: '2px' }}>{value}</div>
-              <div style={{ fontSize: '11px', color: '#64748b' }}>{sub}</div>
+              <div style={{ fontSize: '11px', color: '#71717a' }}>{sub}</div>
             </div>
           ))}
 
@@ -254,11 +254,11 @@ function HeroCard({ vertical, onSelect }) {
 function VerticalCard({ vertical, onSelect, delay }) {
   const colorMap = {
     '#22c55e': { light: '#f0fdf4', border: '#86efac', glow: 'rgba(34,197,94,0.15)' },
-    '#8b5cf6': { light: '#f5f3ff', border: '#c4b5fd', glow: 'rgba(139,92,246,0.15)' },
+    '#0891b2': { light: '#f5f3ff', border: '#5eead4', glow: 'rgba(8,145,178,0.15)' },
     '#f59e0b': { light: '#fffbeb', border: '#fde68a', glow: 'rgba(245,158,11,0.15)' },
-    '#3b82f6': { light: '#eff6ff', border: '#bfdbfe', glow: 'rgba(59,130,246,0.15)' },
+    '#0d9488': { light: '#eff6ff', border: '#bfdbfe', glow: 'rgba(13,148,136,0.15)' },
   };
-  const palette = colorMap[vertical.color] || colorMap['#3b82f6'];
+  const palette = colorMap[vertical.color] || colorMap['#0d9488'];
 
   return (
     <button
@@ -266,7 +266,7 @@ function VerticalCard({ vertical, onSelect, delay }) {
       className="card fade-up"
       style={{
         padding: '32px', borderRadius: '24px', textAlign: 'left',
-        cursor: 'pointer', border: '1px solid #e8edf3',
+        cursor: 'pointer', border: '1px solid #ece9e6',
         background: 'white', width: '100%',
         transition: 'all 0.25s cubic-bezier(0.22,1,0.36,1)',
         animationDelay: `${delay}s`, position: 'relative', overflow: 'hidden',
@@ -278,7 +278,7 @@ function VerticalCard({ vertical, onSelect, delay }) {
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.borderColor = '#e8edf3';
+        e.currentTarget.style.borderColor = '#ece9e6';
         e.currentTarget.style.boxShadow = 'var(--card-shadow)';
       }}
       aria-label={`Select ${vertical.name} workflow`}
@@ -290,8 +290,8 @@ function VerticalCard({ vertical, onSelect, delay }) {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: '26px', marginBottom: '18px', boxShadow: `0 4px 12px ${palette.glow}`,
       }}>{vertical.icon}</div>
-      <div style={{ fontSize: '20px', fontWeight: '900', color: '#0f172a', marginBottom: '8px', letterSpacing: '-0.3px' }}>{vertical.name}</div>
-      <div style={{ fontSize: '14px', color: '#64748b', lineHeight: 1.6, marginBottom: '24px' }}>{vertical.description}</div>
+      <div style={{ fontSize: '20px', fontWeight: '900', color: '#18181b', marginBottom: '8px', letterSpacing: '-0.3px' }}>{vertical.name}</div>
+      <div style={{ fontSize: '14px', color: '#71717a', lineHeight: 1.6, marginBottom: '24px' }}>{vertical.description}</div>
       <div style={{
         display: 'inline-flex', alignItems: 'center', gap: '8px',
         background: palette.light, border: `1.5px solid ${palette.border}`,

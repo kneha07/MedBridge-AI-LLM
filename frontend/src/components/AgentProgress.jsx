@@ -16,7 +16,7 @@ function MockPortalPanel({ step, insuranceProvider }) {
     'Aetna': '#7B2D8B', 'Blue Cross Blue Shield': '#003087', 'United Healthcare': '#002677',
     'Cigna': '#006FC0', 'Humana': '#00833E', 'Medicare': '#1F4E79', 'Medicaid': '#2E7D32',
   };
-  const color = providerColors[insuranceProvider] || '#1a3a5c';
+  const color = providerColors[insuranceProvider] || '#2a2a33';
   const isRunning = step.status === 'running';
 
   return (
@@ -45,7 +45,7 @@ function MockPortalPanel({ step, insuranceProvider }) {
       </div>
 
       {/* Portal body */}
-      <div style={{ background: '#f8fafc', padding: '14px 16px' }}>
+      <div style={{ background: '#fafaf9', padding: '14px 16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
           <div style={{
             width: '8px', height: '8px', borderRadius: '50%',
@@ -57,10 +57,10 @@ function MockPortalPanel({ step, insuranceProvider }) {
             {isRunning ? 'TRANSMITTING — EDI 278 in progress…' : 'RECEIVED — Authorization request accepted'}
           </span>
         </div>
-        <div style={{ fontFamily: 'monospace', fontSize: '10px', color: '#475569', lineHeight: 1.8 }}>
-          <div style={{ color: '#64748b' }}>ISA*00* *00* *ZZ*MEDBRIDGE *ZZ*{(insuranceProvider || '').slice(0,8).toUpperCase().padEnd(8)} *{new Date().toISOString().slice(0,10).replace(/-/g,'')}*</div>
+        <div style={{ fontFamily: 'monospace', fontSize: '10px', color: '#52525b', lineHeight: 1.8 }}>
+          <div style={{ color: '#71717a' }}>ISA*00* *00* *ZZ*MEDBRIDGE *ZZ*{(insuranceProvider || '').slice(0,8).toUpperCase().padEnd(8)} *{new Date().toISOString().slice(0,10).replace(/-/g,'')}*</div>
           <div>GS*HB*MEDBRIDGE*{(insuranceProvider || '').slice(0,6).toUpperCase()}*{Date.now()}*1*X*005010X279A1</div>
-          <div style={{ color: step.status === 'done' ? '#15803d' : '#64748b' }}>
+          <div style={{ color: step.status === 'done' ? '#15803d' : '#71717a' }}>
             {step.status === 'done' ? `✓ TA1 ACK — ${step.data?.confirmation_number || 'CONF-ACCEPTED'} — IK5*A~` : '⏳ Awaiting TA1 acknowledgement…'}
           </div>
         </div>
@@ -73,12 +73,12 @@ function DataChip({ label, value }) {
   return (
     <div style={{
       display: 'inline-flex', alignItems: 'center', gap: '5px',
-      background: '#f8fafc', border: '1px solid #e2e8f0',
+      background: '#fafaf9', border: '1px solid #e7e5e4',
       borderRadius: '8px', padding: '4px 11px', fontSize: '11px',
       boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
     }}>
-      <span style={{ color: '#64748b', fontWeight: '500' }}>{label}:</span>
-      <span style={{ color: '#0f172a', fontWeight: '800' }}>
+      <span style={{ color: '#71717a', fontWeight: '500' }}>{label}:</span>
+      <span style={{ color: '#18181b', fontWeight: '800' }}>
         {typeof value === 'number' && value > 0 && value < 1
           ? `${Math.round(value * 100)}%`
           : String(value)}
@@ -92,7 +92,7 @@ function StepRow({ stepName, step, index, isLast, verticalColor, isDenied, insur
   const isDenialStep = step?.data?.current_status === 'DENIED';
   const isAppealStep = stepName.toLowerCase().includes('appeal');
 
-  const stepColors = ['#8b5cf6', '#3b82f6', '#f59e0b', '#22c55e', '#06b6d4', '#ef4444'];
+  const stepColors = ['#0891b2', '#0d9488', '#f59e0b', '#22c55e', '#0891b2', '#ef4444'];
   const color = isAppealStep ? '#f59e0b' : isDenialStep ? '#ef4444' : stepColors[index % stepColors.length];
   const gradient = `linear-gradient(135deg, ${color}, ${color}cc)`;
 
@@ -101,14 +101,14 @@ function StepRow({ stepName, step, index, isLast, verticalColor, isDenied, insur
     : isAppealStep && status === 'done'
       ? { bg: '#fffbeb', border: '#fde68a', shadow: '0 2px 8px rgba(245,158,11,0.15)' }
       : {
-          pending: { bg: 'white',   border: '#e8edf3',  shadow: '0 1px 4px rgba(0,0,0,0.04)' },
-          running: { bg: '#fafbff', border: color,       shadow: `0 0 0 3px ${color}18, 0 6px 20px rgba(0,0,0,0.07)` },
+          pending: { bg: 'white',   border: '#ece9e6',  shadow: '0 1px 4px rgba(0,0,0,0.04)' },
+          running: { bg: '#fbfaf9', border: color,       shadow: `0 0 0 3px ${color}18, 0 6px 20px rgba(0,0,0,0.07)` },
           done:    { bg: '#f0fdf4', border: '#86efac',   shadow: '0 2px 8px rgba(34,197,94,0.1)' },
           error:   { bg: '#fef2f2', border: '#fca5a5',   shadow: '0 2px 8px rgba(239,68,68,0.1)' },
-        }[status] || { bg: 'white', border: '#e8edf3', shadow: '0 1px 4px rgba(0,0,0,0.04)' };
+        }[status] || { bg: 'white', border: '#ece9e6', shadow: '0 1px 4px rgba(0,0,0,0.04)' };
 
   const statusColor = isDenialStep ? '#ef4444'
-    : { pending: '#64748b', running: color, done: '#166534', error: '#ef4444' }[status];
+    : { pending: '#71717a', running: color, done: '#166534', error: '#ef4444' }[status];
 
   const stepIcons = ['🔍', '📋', '📝', '📤', '📡', '⚡'];
   const icon = isAppealStep ? '⚡' : stepIcons[index % stepIcons.length];
@@ -124,7 +124,7 @@ function StepRow({ stepName, step, index, isLast, verticalColor, isDenied, insur
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '16px', flexShrink: 0 }}>
         <div style={{
           width: '40px', height: '40px', borderRadius: '12px',
-          background: status === 'pending' ? '#f1f5f9'
+          background: status === 'pending' ? '#f5f5f4'
             : isDenialStep ? 'linear-gradient(135deg, #ef4444, #dc2626)'
             : status === 'done' && !isAppealStep ? 'linear-gradient(135deg, #22c55e, #16a34a)'
             : status === 'error' ? 'linear-gradient(135deg, #ef4444, #dc2626)'
@@ -148,7 +148,7 @@ function StepRow({ stepName, step, index, isLast, verticalColor, isDenied, insur
               ? 'linear-gradient(to bottom, #22c55e, #86efac44)'
               : isDenialStep
                 ? 'linear-gradient(to bottom, #ef4444, #fca5a544)'
-                : 'linear-gradient(to bottom, #e2e8f0, transparent)',
+                : 'linear-gradient(to bottom, #e7e5e4, transparent)',
             transition: 'background 0.5s', borderRadius: '2px',
           }} />
         )}
@@ -161,7 +161,7 @@ function StepRow({ stepName, step, index, isLast, verticalColor, isDenied, insur
         marginBottom: isLast ? '0' : '12px', transition: 'all 0.3s', boxShadow: cardBg.shadow,
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
-          <span style={{ fontSize: '14px', fontWeight: '800', color: '#0f172a' }}>{stepName}</span>
+          <span style={{ fontSize: '14px', fontWeight: '800', color: '#18181b' }}>{stepName}</span>
           <div style={{
             fontSize: '10px', fontWeight: '800', letterSpacing: '0.8px',
             color: isDenialStep ? '#ef4444' : statusColor,
@@ -248,7 +248,7 @@ export default function AgentProgress({ steps, status, workflowId, vertical, sta
   const failed = status === 'needs_info' || status === 'rejected';
   const hasDenial = steps.some(s => s.data?.current_status === 'DENIED');
   const hasAppeal = steps.some(s => s.tool_name?.toLowerCase().includes('appeal') && s.status === 'done');
-  const verticalColor = vertical?.color || '#3b82f6';
+  const verticalColor = vertical?.color || '#0d9488';
 
   const insuranceProvider = vertical?.id === 'healthcare'
     ? steps.find(s => s.data?.payer_portal)?.data?.payer_portal?.split(' ')[0] || 'Aetna'
@@ -320,13 +320,13 @@ export default function AgentProgress({ steps, status, workflowId, vertical, sta
                   boxShadow: `0 0 10px ${verticalColor}50`,
                 }} />
               )}
-              <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '900', color: '#0f172a', letterSpacing: '-0.4px' }}>
+              <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '900', color: '#18181b', letterSpacing: '-0.4px' }}>
                 {isComplete
                   ? failed ? (status === 'rejected' ? 'Not submitted' : 'Stopped before finishing') : hasDenial && hasAppeal ? 'Denied — Appeal Filed Automatically' : 'Workflow complete'
                   : hasDenial ? 'Denial Detected — Drafting Appeal…' : status === 'awaiting_approval' ? 'Waiting for your approval' : 'AI Agent Processing…'}
               </h2>
             </div>
-            <p style={{ margin: 0, color: '#64748b', fontSize: '13px', fontWeight: '500' }}>
+            <p style={{ margin: 0, color: '#71717a', fontSize: '13px', fontWeight: '500' }}>
               ID: {workflowId?.slice(0, 8).toUpperCase()} · {doneCount} of {totalSteps} steps complete
             </p>
           </div>
@@ -338,14 +338,14 @@ export default function AgentProgress({ steps, status, workflowId, vertical, sta
                 ? 'linear-gradient(135deg, #f59e0b, #d97706)'
                 : isComplete
                   ? 'linear-gradient(135deg, #22c55e, #16a34a)'
-                  : `linear-gradient(135deg, ${verticalColor}, #6366f1)`,
+                  : `linear-gradient(135deg, ${verticalColor}, #0d9488)`,
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
               transition: 'all 0.4s', letterSpacing: '-2px',
             }}>
               {progress}%
             </div>
             {startTime && (
-              <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px', fontWeight: '600', fontFamily: 'monospace' }}>
+              <div style={{ fontSize: '11px', color: '#71717a', marginTop: '4px', fontWeight: '600', fontFamily: 'monospace' }}>
                 ⏱ {formatTime(elapsed)}
               </div>
             )}
@@ -354,14 +354,14 @@ export default function AgentProgress({ steps, status, workflowId, vertical, sta
 
         {/* Progress bar */}
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ height: '10px', background: '#f1f5f9', borderRadius: '100px', overflow: 'hidden', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)' }}>
+          <div style={{ height: '10px', background: '#f5f5f4', borderRadius: '100px', overflow: 'hidden', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)' }}>
             <div style={{
               height: '100%', width: `${progress}%`,
               background: isComplete && hasDenial
                 ? 'linear-gradient(90deg, #ef4444, #f59e0b)'
                 : isComplete
                   ? 'linear-gradient(90deg, #22c55e, #16a34a)'
-                  : `linear-gradient(90deg, ${verticalColor}, #6366f1, #8b5cf6)`,
+                  : `linear-gradient(90deg, ${verticalColor}, #0d9488, #0891b2)`,
               borderRadius: '100px',
               transition: 'width 0.7s cubic-bezier(0.34,1.3,0.64,1)',
               position: 'relative', overflow: 'hidden',
@@ -381,7 +381,7 @@ export default function AgentProgress({ steps, status, workflowId, vertical, sta
                 <div key={i} title={name || `Step ${i + 1}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
                   <div style={{
                     width: '10px', height: '10px', borderRadius: '50%',
-                    background: done ? '#22c55e' : running ? verticalColor : '#e2e8f0',
+                    background: done ? '#22c55e' : running ? verticalColor : '#e7e5e4',
                     transition: 'all 0.35s',
                     boxShadow: running ? `0 0 0 3px ${verticalColor}30` : done ? '0 0 0 2px rgba(34,197,94,0.2)' : 'none',
                     transform: running ? 'scale(1.3)' : 'scale(1)',

@@ -4,10 +4,10 @@ import { useId } from 'react';
 export default function Logo({ size = 44 }) {
   const id = useId();
   return (
-    <svg width={size} height={size} viewBox="0 0 48 48" role="img" aria-label="MedBridge logo" style={{ flexShrink: 0, filter: 'drop-shadow(0 4px 14px rgba(34,197,94,0.45))' }}>
+    <svg width={size} height={size} viewBox="0 0 48 48" role="img" aria-label="MedBridge logo" style={{ flexShrink: 0, filter: 'drop-shadow(0 4px 14px rgba(13,148,136,0.45))' }}>
       <defs>
         <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#34d399" /><stop offset="1" stopColor="#15803d" />
+          <stop offset="0" stopColor="#2dd4bf" /><stop offset="1" stopColor="#0f766e" />
         </linearGradient>
       </defs>
       <rect width="48" height="48" rx="13" fill={`url(#${id})`} />

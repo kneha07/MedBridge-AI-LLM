@@ -17,8 +17,8 @@ export default function DemoHeader({ onReset, onHome, vertical }) {
       role="banner"
       style={{
         background: scrolled
-          ? 'rgba(10,22,40,0.96)'
-          : 'rgba(10,22,40,0.92)',
+          ? 'rgba(14,14,18,0.96)'
+          : 'rgba(14,14,18,0.92)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         color: 'white',
@@ -41,9 +41,9 @@ export default function DemoHeader({ onReset, onHome, vertical }) {
         <Logo size={46} />
         <span style={{ display: 'block' }}>
           <span style={{ display: 'block', fontSize: '27px', fontWeight: 900, letterSpacing: '-0.9px', lineHeight: 1, color: '#ffffff' }}>
-            Med<span style={{ color: '#4ade80' }}>Bridge</span>
+            Med<span style={{ color: '#5eead4' }}>Bridge</span>
           </span>
-          <span style={{ display: 'block', fontSize: '11px', color: '#94a3b8', letterSpacing: '1.3px', textTransform: 'uppercase', marginTop: '5px', fontWeight: 700 }}>
+          <span style={{ display: 'block', fontSize: '11px', color: '#a1a1aa', letterSpacing: '1.3px', textTransform: 'uppercase', marginTop: '5px', fontWeight: 700 }}>
             {vertical ? vertical.name : 'Prior authorization assistant'}
           </span>
         </span>
@@ -55,11 +55,11 @@ export default function DemoHeader({ onReset, onHome, vertical }) {
         display: 'flex', alignItems: 'center', gap: '10px',
         fontSize: '13px',
       }}>
-        <span style={{ color: '#22c55e', fontWeight: '800' }}>Draft</span>
-        <span style={{ color: '#475569' }}>·</span>
-        <span style={{ color: '#94a3b8', fontWeight: '700' }}>Review</span>
-        <span style={{ color: '#475569' }}>·</span>
-        <span style={{ color: '#94a3b8', fontWeight: '700' }}>Submit</span>
+        <span style={{ color: '#2dd4bf', fontWeight: '800' }}>Draft</span>
+        <span style={{ color: '#52525b' }}>·</span>
+        <span style={{ color: '#a1a1aa', fontWeight: '700' }}>Review</span>
+        <span style={{ color: '#52525b' }}>·</span>
+        <span style={{ color: '#a1a1aa', fontWeight: '700' }}>Submit</span>
       </div>
 
       {/* Right */}
@@ -69,21 +69,21 @@ export default function DemoHeader({ onReset, onHome, vertical }) {
           aria-label="Live demo active"
           style={{
             display: 'flex', alignItems: 'center', gap: '7px',
-            background: 'rgba(34,197,94,0.1)',
-            border: '1px solid rgba(34,197,94,0.3)',
+            background: 'rgba(45,212,191,0.1)',
+            border: '1px solid rgba(45,212,191,0.3)',
             padding: '6px 14px',
             borderRadius: '100px',
-            boxShadow: '0 0 12px rgba(34,197,94,0.15)',
+            boxShadow: '0 0 12px rgba(45,212,191,0.15)',
           }}
         >
           <span style={{
             width: '7px', height: '7px', borderRadius: '50%',
-            background: '#22c55e',
+            background: '#2dd4bf',
             display: 'inline-block',
-            boxShadow: '0 0 8px rgba(34,197,94,0.8)',
+            boxShadow: '0 0 8px rgba(45,212,191,0.8)',
             animation: 'pulse 2s infinite'
           }} />
-          <span style={{ fontSize: '11px', fontWeight: '700', color: '#22c55e', letterSpacing: '1px' }}>
+          <span style={{ fontSize: '11px', fontWeight: '700', color: '#2dd4bf', letterSpacing: '1px' }}>
             LIVE DEMO
           </span>
         </div>

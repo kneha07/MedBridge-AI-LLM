@@ -45,9 +45,9 @@ export default function ResultCard({ workflowData, vertical, onStartNew }) {
           </div>
 
           {/* Arrow connector */}
-          <div style={{ textAlign: 'center', background: '#0f172a', padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <div style={{ textAlign: 'center', background: '#18181b', padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
             <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }} />
-            <span style={{ fontSize: '12px', color: '#7dd3fc', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase' }}>⚡ MedBridge Auto-Appeal Triggered</span>
+            <span style={{ fontSize: '12px', color: '#5eead4', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase' }}>⚡ MedBridge Auto-Appeal Triggered</span>
             <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }} />
           </div>
 
@@ -99,7 +99,7 @@ export default function ResultCard({ workflowData, vertical, onStartNew }) {
               fontSize: '32px', flexShrink: 0, boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
             }}>{vertical?.icon || '✅'}</div>
             <div>
-              <h2 style={{ margin: '0 0 7px', color: 'white', fontSize: '22px', fontWeight: '900', letterSpacing: '-0.4px' }}>
+              <h2 style={{ fontFamily: "'Source Serif 4', Georgia, serif", margin: '0 0 7px', color: 'white', fontSize: '22px', fontWeight: '900', letterSpacing: '-0.4px' }}>
                 {vertical?.name || 'Workflow'} Complete
               </h2>
               <p style={{ margin: 0, color: 'rgba(255,255,255,0.75)', fontSize: '14px', lineHeight: 1.5 }}>
@@ -114,11 +114,11 @@ export default function ResultCard({ workflowData, vertical, onStartNew }) {
       {confirmationData?.confirmation_number && (
         <div className="fade-up card" style={{ padding: '24px 28px', marginBottom: '16px', borderRadius: '20px', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(ellipse at 0% 50%, ${verticalColor}08, transparent 60%)`, pointerEvents: 'none' }} />
-          <div style={{ fontSize: '10px', fontWeight: '700', color: '#64748b', letterSpacing: '1.2px', textTransform: 'uppercase', marginBottom: '10px' }}>
+          <div style={{ fontSize: '10px', fontWeight: '700', color: '#71717a', letterSpacing: '1.2px', textTransform: 'uppercase', marginBottom: '10px' }}>
             📋 Confirmation Number
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '28px', fontWeight: '900', fontFamily: 'monospace', letterSpacing: '1.5px', color: '#0f172a' }}>
+            <span style={{ fontSize: '28px', fontWeight: '900', fontFamily: 'monospace', letterSpacing: '1.5px', color: '#18181b' }}>
               {confirmationData.confirmation_number}
             </span>
             <span style={{
@@ -169,12 +169,12 @@ export default function ResultCard({ workflowData, vertical, onStartNew }) {
       {/* ── Detail grid ── */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
         {[
-          { label: 'Patient / Client', value: primaryName, icon: '👤', color: '#8b5cf6', sub: workflowData?.vertical_id },
+          { label: 'Patient / Client', value: primaryName, icon: '👤', color: '#0891b2', sub: workflowData?.vertical_id },
           { label: 'Status', value: isDenied && hasAppeal ? 'Appeal Filed' : workflowData?.status === 'submitted' ? 'Submitted' : 'Complete', icon: isDenied ? '⚡' : '🟢', color: isDenied ? '#f59e0b' : '#22c55e', sub: isDenied ? 'Awaiting appeal decision' : 'Active monitoring' },
         ].map(({ label, value, icon, color, sub }) => (
           <div key={label} className="fade-up" style={{
             background: 'white', borderRadius: '16px', padding: '20px 22px',
-            border: '1px solid #e8edf3', boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+            border: '1px solid #ece9e6', boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
             transition: 'box-shadow 0.2s, transform 0.2s', cursor: 'default',
           }}
             onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.09)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
@@ -182,10 +182,10 @@ export default function ResultCard({ workflowData, vertical, onStartNew }) {
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '10px' }}>
               <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px' }}>{icon}</div>
-              <span style={{ fontSize: '10px', fontWeight: '700', color: '#64748b', letterSpacing: '0.8px', textTransform: 'uppercase' }}>{label}</span>
+              <span style={{ fontSize: '10px', fontWeight: '700', color: '#71717a', letterSpacing: '0.8px', textTransform: 'uppercase' }}>{label}</span>
             </div>
-            <div style={{ fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: sub ? '4px' : 0 }}>{value}</div>
-            {sub && <div style={{ fontSize: '11px', color: '#64748b', fontWeight: '500', textTransform: 'capitalize' }}>{sub}</div>}
+            <div style={{ fontSize: '15px', fontWeight: '800', color: '#18181b', marginBottom: sub ? '4px' : 0 }}>{value}</div>
+            {sub && <div style={{ fontSize: '11px', color: '#71717a', fontWeight: '500', textTransform: 'capitalize' }}>{sub}</div>}
           </div>
         ))}
       </div>
@@ -193,7 +193,7 @@ export default function ResultCard({ workflowData, vertical, onStartNew }) {
       {/* ── AI Summary ── */}
       {result && (
         <div className="fade-up-2 card" style={{ padding: '24px 26px', marginBottom: '16px', borderRadius: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #f5f5f4' }}>
             <div style={{
               width: '40px', height: '40px', borderRadius: '12px',
               background: aiProvider === 'groq' ? 'linear-gradient(135deg, #ea580c, #c2410c)' : 'linear-gradient(135deg, #7c3aed, #5b21b6)',
@@ -201,8 +201,8 @@ export default function ResultCard({ workflowData, vertical, onStartNew }) {
               boxShadow: aiProvider === 'groq' ? '0 4px 12px rgba(234,88,12,0.35)' : '0 4px 12px rgba(124,58,237,0.35)',
             }}>🤖</div>
             <div>
-              <div style={{ fontSize: '14px', fontWeight: '800', color: '#0f172a' }}>MedBridge AI Summary</div>
-              <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
+              <div style={{ fontSize: '14px', fontWeight: '800', color: '#18181b' }}>MedBridge AI Summary</div>
+              <div style={{ fontSize: '11px', color: '#71717a', marginTop: '2px' }}>
                 Written by the AI agent from its tool results
               </div>
             </div>
@@ -225,20 +225,20 @@ export default function ResultCard({ workflowData, vertical, onStartNew }) {
       {completedStepNames.length > 0 && (
         <div className="fade-up-3" style={{
           borderRadius: '20px', marginBottom: '20px',
-          background: 'linear-gradient(135deg, #0a1628 0%, #1a3a5c 60%, #1e3a8a 100%)',
+          background: 'linear-gradient(135deg, #0e0e12 0%, #2a2a33 60%, #1e3a8a 100%)',
           boxShadow: '0 12px 36px rgba(10,22,40,0.45), inset 0 1px 0 rgba(255,255,255,0.07)',
           position: 'relative', overflow: 'hidden', padding: '28px 32px', color: 'white',
         }}>
           <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '200px', height: '200px', borderRadius: '50%', background: `radial-gradient(circle, ${verticalColor}20, transparent 70%)` }} />
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ fontSize: '11px', color: '#7dd3fc', marginBottom: '16px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: '11px', color: '#5eead4', marginBottom: '16px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase' }}>
               ✓ What MedBridge prepared
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               {completedStepNames.map(name => (
                 <div key={name} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ fontSize: '15px', color: name.toLowerCase().includes('appeal') ? '#f59e0b' : verticalColor }}>✓</span>
-                  <span style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: '500' }}>{name}</span>
+                  <span style={{ fontSize: '12px', color: '#d4d4d8', fontWeight: '500' }}>{name}</span>
                 </div>
               ))}
             </div>
@@ -252,24 +252,24 @@ export default function ResultCard({ workflowData, vertical, onStartNew }) {
         aria-label="Start a new request"
         style={{
           width: '100%', padding: '16px',
-          background: 'white', color: '#1a3a5c',
-          border: '2px solid #e2e8f0', borderRadius: '16px',
+          background: 'white', color: '#2a2a33',
+          border: '2px solid #e7e5e4', borderRadius: '16px',
           fontSize: '15px', fontWeight: '800', cursor: 'pointer',
           transition: 'all 0.25s', letterSpacing: '0.1px',
           boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
         }}
         onMouseEnter={e => {
-          e.currentTarget.style.background = 'linear-gradient(135deg, #0a1628, #1a3a5c)';
+          e.currentTarget.style.background = 'linear-gradient(135deg, #0e0e12, #2a2a33)';
           e.currentTarget.style.color = 'white';
-          e.currentTarget.style.borderColor = '#0a1628';
+          e.currentTarget.style.borderColor = '#0e0e12';
           e.currentTarget.style.boxShadow = '0 8px 24px rgba(10,22,40,0.3)';
           e.currentTarget.style.transform = 'translateY(-1px)';
         }}
         onMouseLeave={e => {
           e.currentTarget.style.background = 'white';
-          e.currentTarget.style.color = '#1a3a5c';
-          e.currentTarget.style.borderColor = '#e2e8f0';
+          e.currentTarget.style.color = '#2a2a33';
+          e.currentTarget.style.borderColor = '#e7e5e4';
           e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
           e.currentTarget.style.transform = 'none';
         }}
