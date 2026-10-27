@@ -14,8 +14,8 @@ MedBridge is an LLM agent for clinic staff. It scans a payer's policy, analyzes 
 
 ## Why this problem
 
-- In the AMA's 2024 survey of 1,000 physicians, 94% said prior authorization delays necessary care, 24% reported a serious adverse event for a patient, and practices reported 43 requests and about 12 staff hours per physician per week ([AMA](https://www.ama-assn.org/press-center/press-releases/ama-survey-indicates-prior-authorization-wreaks-havoc-patient-care); the AMA opposes prior authorization).
-- In 2024 Medicare Advantage insurers fully or partially denied 4.1 million of 52.8 million requests; 80.7% of appealed denials were overturned, but only 11.5% of denials were appealed ([KFF](https://www.kff.org/f63a430)).
+- In an AMA survey of 1,000 physicians (fielded December 2023, published June 2024), 94% said prior authorization delays necessary care, 24% reported a serious adverse event for a patient, and physicians reported completing an average of 43 requests a week, equal to about 12 hours of physician and staff time ([AMA](https://www.ama-assn.org/press-center/press-releases/ama-survey-indicates-prior-authorization-wreaks-havoc-patient-care); the AMA opposes prior authorization).
+- In 2024 Medicare Advantage insurers fully or partially denied 4.1 million of 52.8 million requests; 80.7% of appealed denials were overturned, but only 11.5% of denials were appealed ([KFF](https://www.kff.org/medicare/medicare-advantage-insurers-made-nearly-53-million-prior-authorization-determinations-in-2024/)).
 - Wait times are contested: in an AMA survey (2017 data), about two-thirds of physicians waited at least one business day for a decision and roughly 30% waited three days or longer ([AMA](https://ama-assn.org/survey-patient-clinical-outcomes-shortchanged-prior-authorization)); insurer-reported medians are about one day ([KFF](https://www.kff.org/patient-consumer-protections/prior-authorization-metrics-provide-new-insights-into-insurer-practices-but-gaps-remain/)).
 - CAQH Index 2019: a manual prior authorization cost providers $10.92 versus $1.88 electronically ([summary](https://blog.quadax.com/key-takeaways-from-the-2019-caqh-index)).
 
@@ -146,7 +146,7 @@ Full MIMIC-IV (needs credentialed access) or Synthea for more patients, more pay
 
 [FastAPI](https://fastapi.tiangolo.com/) · [ChromaDB](https://www.trychroma.com/) · [sentence-transformers](https://www.sbert.net/) · [Groq](https://groq.com/) · [Claude](https://www.anthropic.com/claude) · [Amazon Bedrock](https://aws.amazon.com/bedrock/) · [React](https://react.dev/) + [Vite](https://vitejs.dev/)
 
-Optional: [Wispr Flow](https://wisprflow.ai/) for hands-free voice dictation into the request form. It is an external, system-wide dictation tool and is not integrated into the app. Dictation sends audio to a cloud service, so use demo data only.
+Voice dictation: the request form has a Dictate button on the free-text fields (patient name, physician name, clinical justification), using the browser's built-in speech recognition (Chrome and Safari; not shown where unsupported). Audio is processed by the browser's speech service, so use demo data only. An external tool such as [Wispr Flow](https://wisprflow.ai/) also works but is not integrated.
 
 ## License
 
