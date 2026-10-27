@@ -146,6 +146,8 @@ Full MIMIC-IV (needs credentialed access) or Synthea for more patients, more pay
 
 [FastAPI](https://fastapi.tiangolo.com/) · [ChromaDB](https://www.trychroma.com/) · [sentence-transformers](https://www.sbert.net/) · [Groq](https://groq.com/) · [Claude](https://www.anthropic.com/claude) · [Amazon Bedrock](https://aws.amazon.com/bedrock/) · [React](https://react.dev/) + [Vite](https://vitejs.dev/)
 
+Optional: [Wispr Flow](https://wisprflow.ai/) for hands-free voice dictation into the request form. It is an external, system-wide dictation tool and is not integrated into the app. Dictation sends audio to a cloud service, so use demo data only.
+
 ## License
 
 All Rights Reserved. See [LICENSE](LICENSE).
