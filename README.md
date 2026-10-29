@@ -98,6 +98,17 @@ Other held-out results (single run, same model): plain LLM without retrieval 6/1
 
 One question (`h-bcbssc-postop`: how long after surgery to wait before imaging for pseudarthrosis) failed in all four retrieval runs, at both settings. The passage exists and ranks 3rd for the literal question with the payer filter, but the model's own search wording (it adds payer names and boilerplate) pushes it to about 9th, so it never saw it. That is a weakness in how the chatbot phrases its searches, not in the corpus.
 
+**Shorter search queries (tried, not adopted).** One failure (`h-bcbssc-postop`) happened because the model's own search wording, which adds payer names and boilerplate, pushed the right passage from 3rd to about 9th. I tried a prompt rule asking for short topical queries without the payer name (`CHAT_SHORT_QUERIES=1`, off by default) and tested it on all three question sets, two runs each. The third set (`eval/chat_questions_set3.json`, 15 questions) was written and committed before the rule existed.
+
+| Answerable questions correct | Current prompt (2 runs) | Short-query rule (2 runs) |
+|---|---|---|
+| First set, 30 | 27, 27 | 25, 25 |
+| Held-out set, 16 | 14, 15 | 16, 16 |
+| Third set, 12 (written before the rule) | 9, 9 | 9, 8 |
+| **All 58** | **50, 51** | **50, 49** |
+
+The rule fixed the question it was designed from and made the held-out set perfect, but that set is where I found the problem, so it is not a fair test. On the clean third set it did no better, and on the first set it lost two questions in both runs (`bcbsla-ddd`, `hh-compression`). Overall it is no better than the current prompt within run-to-run variation, so it stays off. A pattern worth following up instead: most of the persistent misses are questions about the Blue Cross Blue Shield of South Carolina policy (`bcbs-4wk`, `h-bcbssc-postop`, `s3-bcbssc-dimple`, `s3-bcbssc-ankylosing`), which is the longest document and shares the payer filter with the Louisiana policy.
+
 **Chunk-size ablation** (`python -m eval.ablation_eval`, same 34 queries, payer filter on / off; results in `eval/results/retrieval_ablation.json`):
 
 | Chunk words (overlap) | Chunks | MRR, filter on | MRR, filter off |

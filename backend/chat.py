@@ -21,6 +21,15 @@ Rules:
 - Call search_policy at most twice per question. If the passages still do not answer it, say the document collection does not cover it; do not keep searching.
 - Keep answers short and concrete."""
 
+# Experiment (off by default, CHAT_SHORT_QUERIES=1): ask the model for short topical search queries. The model's own
+# queries tended to add payer names and boilerplate, which pushed the right passage down the ranking.
+SHORT_QUERY_RULE = ("- When you call search_policy, write the query as a short topical phrase (3 to 8 words) naming the clinical "
+                    "service and the criterion, for example 'postoperative pseudarthrosis imaging timing'. Do not put the payer's "
+                    "name, a document name or generic words such as 'policy', 'criteria' or 'requirements' in the query; pass "
+                    "the payer in the payer argument instead.")
+if os.environ.get("CHAT_SHORT_QUERIES") == "1":
+    SYSTEM_PROMPT += "\n" + SHORT_QUERY_RULE
+
 TOOLS = [
     {"type": "function", "function": {
         "name": "search_policy",
