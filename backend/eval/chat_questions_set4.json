@@ -1,0 +1,161 @@
+[
+ {
+  "id": "s4-sc-peds-age",
+  "payer": "Blue Cross Blue Shield",
+  "question": "In the Blue Cross Blue Shield of South Carolina lumbar MRI policy, at what age or younger does isolated back pain in a child count as a red flag?",
+  "answerable": true,
+  "must_match": [
+   "\\b5\\b|five"
+  ],
+  "expected_sources": [
+   "CAM 709"
+  ]
+ },
+ {
+  "id": "s4-sc-peds-conservative",
+  "payer": "Blue Cross Blue Shield",
+  "question": "In the Blue Cross Blue Shield of South Carolina lumbar MRI policy, is conservative care required for isolated pediatric back pain when red flags are present?",
+  "answerable": true,
+  "must_match": [
+   "not required|not need|does not require|isn.t required|without"
+  ],
+  "expected_sources": [
+   "CAM 709"
+  ]
+ },
+ {
+  "id": "s4-sc-infection-followup",
+  "payer": "Blue Cross Blue Shield",
+  "question": "When does the Blue Cross Blue Shield of South Carolina lumbar MRI policy approve follow-up imaging of a spinal infection?",
+  "answerable": true,
+  "must_match": [
+   "worsening"
+  ],
+  "expected_sources": [
+   "CAM 709"
+  ]
+ },
+ {
+  "id": "s4-sc-scoliosis",
+  "payer": "Blue Cross Blue Shield",
+  "question": "Which findings make scoliosis an indication for lumbar MRI in the Blue Cross Blue Shield of South Carolina policy?",
+  "answerable": true,
+  "must_match": [
+   "progressive",
+   "neurologic"
+  ],
+  "expected_sources": [
+   "CAM 709"
+  ]
+ },
+ {
+  "id": "s4-sc-mri-contra",
+  "payer": "Blue Cross Blue Shield",
+  "question": "According to the Blue Cross Blue Shield of South Carolina lumbar MRI policy, what reasons may mean an MRI cannot be performed?",
+  "answerable": true,
+  "must_match": [
+   "claustrophobia"
+  ],
+  "expected_sources": [
+   "CAM 709"
+  ]
+ },
+ {
+  "id": "s4-sc-ct-contra",
+  "payer": "Blue Cross Blue Shield",
+  "question": "According to the Blue Cross Blue Shield of South Carolina lumbar MRI policy, what reasons may mean a CT cannot be performed?",
+  "answerable": true,
+  "must_match": [
+   "renal",
+   "allerg"
+  ],
+  "expected_sources": [
+   "CAM 709"
+  ]
+ },
+ {
+  "id": "s4-sc-anomalies",
+  "payer": "Blue Cross Blue Shield",
+  "question": "Which vertebral anomalies with back pain in a child justify MRI under the Blue Cross Blue Shield of South Carolina lumbar MRI policy?",
+  "answerable": true,
+  "must_match": [
+   "hemivertebra"
+  ],
+  "expected_sources": [
+   "CAM 709"
+  ]
+ },
+ {
+  "id": "s4-sc-scoliosis-preop",
+  "payer": "Blue Cross Blue Shield",
+  "question": "What must the office notes show for pre-operative imaging in scoliosis under the Blue Cross Blue Shield of South Carolina policy?",
+  "answerable": true,
+  "must_match": [
+   "management"
+  ],
+  "expected_sources": [
+   "CAM 709"
+  ]
+ },
+ {
+  "id": "s4-la-expectation",
+  "payer": "Blue Cross Blue Shield",
+  "question": "What does Blue Cross Blue Shield of Louisiana's Medicare Advantage lumbar MRI policy say Medicare expects about the information gained from the MRI?",
+  "answerable": true,
+  "must_match": [
+   "decision|treatment"
+  ],
+  "expected_sources": [
+   "MNG-018"
+  ]
+ },
+ {
+  "id": "s4-la-investigational",
+  "payer": "Blue Cross Blue Shield",
+  "question": "Which uses of lumbar MRI does Blue Cross Blue Shield of Louisiana's Medicare Advantage policy call investigational?",
+  "answerable": true,
+  "must_match": [
+   "spectroscopy",
+   "blood flow"
+  ],
+  "expected_sources": [
+   "MNG-018"
+  ]
+ },
+ {
+  "id": "s4-la-ct",
+  "payer": "Blue Cross Blue Shield",
+  "question": "When may a lumbar CT be warranted after an MRI under Blue Cross Blue Shield of Louisiana's Medicare Advantage policy?",
+  "answerable": true,
+  "must_match": [
+   "inconclusive"
+  ],
+  "expected_sources": [
+   "MNG-018"
+  ]
+ },
+ {
+  "id": "s4-na-sc-second-opinion",
+  "payer": "Blue Cross Blue Shield",
+  "question": "Does Blue Cross Blue Shield of South Carolina require a second physician opinion before a lumbar MRI?",
+  "answerable": false,
+  "must_match": [],
+  "expected_sources": []
+ },
+ {
+  "id": "s4-na-la-pediatric",
+  "payer": "Blue Cross Blue Shield",
+  "question": "What does Blue Cross Blue Shield of Louisiana's lumbar MRI policy say about imaging children?",
+  "answerable": false,
+  "must_match": [],
+  "expected_sources": []
+ },
+ {
+  "id": "s4-na-sc-turnaround",
+  "payer": "Blue Cross Blue Shield",
+  "question": "How many days does Blue Cross Blue Shield of South Carolina take to decide a prior authorization request?",
+  "answerable": false,
+  "must_match": [],
+  "expected_sources": []
+ }
+]
