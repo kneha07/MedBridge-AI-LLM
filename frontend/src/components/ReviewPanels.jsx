@@ -170,7 +170,7 @@ export function AuditTrail({ audit }) {
 const STATUS_STYLE = {
   submitted: ['#166534', '#dcfce7', 'Submitted'], awaiting_approval: ['#92400e', '#fef3c7', 'Needs review'],
   processing: ['#0f766e', '#dbeafe', 'Processing'], pending: ['#52525b', '#f5f5f4', 'Pending'],
-  rejected: ['#991b1b', '#fee2e2', 'Rejected'], needs_info: ['#991b1b', '#fee2e2', 'Failed'], denied: ['#991b1b', '#fee2e2', 'Denied'], approved: ['#166534', '#dcfce7', 'Approved'],
+  rejected: ['#991b1b', '#fee2e2', 'Rejected'], needs_info: ['#92400e', '#fef3c7', 'Stopped'], denied: ['#991b1b', '#fee2e2', 'Denied'], approved: ['#166534', '#dcfce7', 'Approved'],
 };
 
 function ago(iso) {
@@ -200,8 +200,8 @@ export function HistoryPanel({ items, onOpen }) {
           return (
             <button key={h.workflow_id} onClick={() => onOpen(h.workflow_id)} className="fade-up hist-card" style={{ animationDelay: `${i * 40}ms` }}>
               <span className="hist-icon"><Icon name="clipboard" size={20} /></span>
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: 'block', fontWeight: 700, color: '#18181b', fontSize: 15.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{h.summary}</span>
+              <span className="hist-main" style={{ flex: 1, minWidth: 0 }}>
+                <span className="hist-name" style={{ display: 'block', fontWeight: 700, color: '#18181b', fontSize: 15.5 }}>{h.summary}</span>
                 <span style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 6 }}>
                   {[h.insurance, h.treatment].filter(Boolean).map(t => <span key={t} className="hist-chip">{t}</span>)}
                   <span style={{ color: '#71717a', fontSize: 12.5, alignSelf: 'center' }} title={new Date(h.created_at + 'Z').toLocaleString()}>{ago(h.created_at)}</span>

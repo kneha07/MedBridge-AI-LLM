@@ -127,7 +127,7 @@ export default function WorkflowForm({ vertical, onSubmit, onBack, loading }) {
         <form onSubmit={handleSubmit} style={{ padding: '32px 36px' }}>
 
           {/* Dynamic fields */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+          <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
             {visibleFields.map(f => (
               <div key={f.key} style={{ gridColumn: f.type === 'textarea' ? '1 / -1' : 'auto' }}>
                 <Field label={f.label} required={f.required} action={canDictate(f) ? <MicButton label={f.label} onText={dictate(f.key)} /> : null}>
@@ -164,7 +164,7 @@ export default function WorkflowForm({ vertical, onSubmit, onBack, loading }) {
             <div style={{ fontSize: '14px', fontWeight: '600', color: '#3f3f46', marginBottom: '12px' }}>
               Scenario to demonstrate
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="scenario-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               {[
                 { v: false, label: 'Standard Approval',    sub: 'Auth submitted and approved',          icon: 'checkcircle', color: '#15803d', bg: '#f0fdf4', border: '#86efac' },
                 { v: true,  label: 'Denial + Auto-Appeal', sub: 'Denied → MedBridge files appeal',      icon: 'bolt', color: '#b45309', bg: '#fffbeb', border: '#fde68a' },

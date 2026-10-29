@@ -138,8 +138,8 @@ export default function App() {
       <a href="#main" className="skip-link">Skip to main content</a>
       <DemoHeader user={authOn ? user : null} onSignOut={signOut} onHome={() => setMode('home')} onReset={mode === 'workflow' && view !== 'select' ? handleReset : null} vertical={mode === 'workflow' ? vertical : null} />
 
-      <nav style={{ display: 'flex', justifyContent: 'center', padding: '16px 12px 0' }} aria-label="Main">
-        <div style={{ display: 'inline-flex', gap: 4, padding: 4, background: 'white', border: '1px solid #e7e5e4', borderRadius: 14, boxShadow: '0 2px 8px rgba(15,23,42,0.05)' }}>
+      <nav className="nav-tabs" style={{ display: 'flex', justifyContent: 'center', padding: '16px 12px 0' }} aria-label="Main">
+        <div className="nav-tabs-inner" style={{ display: 'inline-flex', gap: 4, padding: 4, background: 'white', border: '1px solid #e7e5e4', borderRadius: 14, boxShadow: '0 2px 8px rgba(15,23,42,0.05)' }}>
           {[['home', 'home', 'Home'], ['workflow', 'clipboard', 'New request'], ['chat', 'message', 'Ask a question'], ['history', 'clock', 'Past requests'], ...(authOn && user?.role === 'reviewer' ? [['team', 'user', 'Team']] : [])].map(([id, icon, label]) => (
             <button key={id} className="nav-tab" onClick={() => (id === 'workflow' ? startRequest() : setMode(id))} aria-current={mode === id ? 'page' : undefined} style={{
               display: 'inline-flex', alignItems: 'center', gap: 8, border: 'none', cursor: 'pointer', padding: '10px 18px', borderRadius: 10, fontSize: 14, fontWeight: 700,

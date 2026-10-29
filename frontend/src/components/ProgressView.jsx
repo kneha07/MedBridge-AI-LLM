@@ -70,7 +70,7 @@ function Step({ name, step, stopped, first, last }) {
         {rows.length > 0 && (
           <details style={{ marginTop: 8 }}>
             <summary style={{ cursor: 'pointer', fontSize: 14, fontWeight: 600, color: '#0f766e' }}>Details</summary>
-            <dl style={{ margin: '8px 0 0', display: 'grid', gridTemplateColumns: 'minmax(150px, 220px) 1fr', gap: '6px 16px', fontSize: 14 }}>
+            <dl className="kv-grid" style={{ margin: '8px 0 0', display: 'grid', gridTemplateColumns: 'minmax(150px, 220px) 1fr', gap: '6px 16px', fontSize: 14 }}>
               {rows.map(([k, v]) => (
                 <div key={k} style={{ display: 'contents' }}>
                   <dt style={{ color: '#52525b' }}>{label(k)}</dt>

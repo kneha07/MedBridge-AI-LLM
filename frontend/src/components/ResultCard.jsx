@@ -167,7 +167,7 @@ export default function ResultCard({ workflowData, vertical, onStartNew }) {
       )}
 
       {/* ── Detail grid ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
+      <div className="result-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
         {[
           { label: 'Patient / Client', value: primaryName, icon: '👤', color: '#0891b2', sub: workflowData?.vertical_id },
           { label: 'Status', value: isDenied && hasAppeal ? 'Appeal Filed' : workflowData?.status === 'submitted' ? 'Submitted' : 'Complete', icon: isDenied ? '⚡' : '🟢', color: isDenied ? '#f59e0b' : '#22c55e', sub: isDenied ? 'Awaiting appeal decision' : 'Active monitoring' },
@@ -234,7 +234,7 @@ export default function ResultCard({ workflowData, vertical, onStartNew }) {
             <div style={{ fontSize: '11px', color: '#5eead4', marginBottom: '16px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase' }}>
               ✓ What MedBridge prepared
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div className="result-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               {completedStepNames.map(name => (
                 <div key={name} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ fontSize: '15px', color: name.toLowerCase().includes('appeal') ? '#f59e0b' : verticalColor }}>✓</span>

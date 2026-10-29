@@ -48,7 +48,7 @@ export default function TeamPanel({ me }) {
                 </span>
               </span>
               <span className={`role-pill ${u.role}`}>{u.role}</span>
-              {fixed ? <span style={{ width: 118 }} aria-hidden="true" /> : (
+              {fixed ? <span className="team-spacer" style={{ width: 118 }} aria-hidden="true" /> : (
                 <button className="team-action" disabled={busy === u.name} onClick={() => change(u.name, u.role === 'reviewer' ? 'staff' : 'reviewer')}>
                   {u.role === 'reviewer' ? 'Make staff' : 'Make reviewer'}
                 </button>

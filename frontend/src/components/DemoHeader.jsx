@@ -15,6 +15,7 @@ export default function DemoHeader({ onReset, onHome, vertical, user, onSignOut 
   return (
     <header
       role="banner"
+      className="app-header"
       style={{
         background: scrolled
           ? 'rgba(14,14,18,0.96)'
@@ -40,10 +41,10 @@ export default function DemoHeader({ onReset, onHome, vertical, user, onSignOut 
         style={{ display: 'flex', alignItems: 'center', gap: '14px', background: 'none', border: 'none', padding: '4px', cursor: 'pointer', color: 'white', textAlign: 'left' }}>
         <Logo size={46} />
         <span style={{ display: 'block' }}>
-          <span style={{ display: 'block', fontSize: '27px', fontWeight: 900, letterSpacing: '-0.9px', lineHeight: 1, color: '#ffffff' }}>
+          <span className="hdr-word" style={{ display: 'block', fontSize: '27px', fontWeight: 900, letterSpacing: '-0.9px', lineHeight: 1, color: '#ffffff' }}>
             Med<span style={{ color: '#5eead4' }}>Bridge</span>
           </span>
-          <span style={{ display: 'block', fontSize: '11px', color: '#a1a1aa', letterSpacing: '1.3px', textTransform: 'uppercase', marginTop: '5px', fontWeight: 700 }}>
+          <span className="hdr-sub" style={{ display: 'block', fontSize: '11px', color: '#a1a1aa', letterSpacing: '1.3px', textTransform: 'uppercase', marginTop: '5px', fontWeight: 700 }}>
             {vertical ? vertical.name : 'Prior authorization assistant'}
           </span>
         </span>
@@ -67,6 +68,7 @@ export default function DemoHeader({ onReset, onHome, vertical, user, onSignOut 
         <div
           role="status"
           aria-label="Live demo active"
+          className="hdr-live"
           style={{
             display: 'flex', alignItems: 'center', gap: '7px',
             background: 'rgba(45,212,191,0.1)',
