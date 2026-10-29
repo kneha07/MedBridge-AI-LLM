@@ -1,0 +1,172 @@
+[
+ {
+  "id": "s3-aetna-bmi-asian",
+  "payer": "Aetna",
+  "question": "What BMI does Aetna require for adults with persistent severe obesity, and is the threshold different for people of Asian ancestry?",
+  "answerable": true,
+  "must_match": [
+   "37\\.5"
+  ],
+  "expected_sources": [
+   "CPB 0157"
+  ]
+ },
+ {
+  "id": "s3-aetna-balloon",
+  "payer": "Aetna",
+  "question": "Does Aetna consider intragastric balloons such as the Obalon system medically necessary for obesity?",
+  "answerable": true,
+  "must_match": [
+   "experimental|investigational|unproven"
+  ],
+  "expected_sources": [
+   "CPB 0157"
+  ]
+ },
+ {
+  "id": "s3-aetna-fracture",
+  "payer": "Aetna",
+  "question": "When does Aetna consider spine MRI or CT necessary for a suspected spinal fracture after trauma?",
+  "answerable": true,
+  "must_match": [
+   "plain film"
+  ],
+  "expected_sources": [
+   "CPB 0236"
+  ]
+ },
+ {
+  "id": "s3-bcbssc-dimple",
+  "payer": "Blue Cross Blue Shield",
+  "question": "In the Blue Cross Blue Shield of South Carolina lumbar MRI policy, how large a sacral dimple is suspicious for a tethered cord?",
+  "answerable": true,
+  "must_match": [
+   "0\\.5 ?cm"
+  ],
+  "expected_sources": [
+   "CAM 709"
+  ]
+ },
+ {
+  "id": "s3-bcbssc-ankylosing",
+  "payer": "Blue Cross Blue Shield",
+  "question": "In the Blue Cross Blue Shield of South Carolina lumbar MRI policy, which underlying spinal conditions make both MRI and CT approvable?",
+  "answerable": true,
+  "must_match": [
+   "ankylosing",
+   "hyperostosis|DISH"
+  ],
+  "expected_sources": [
+   "CAM 709"
+  ]
+ },
+ {
+  "id": "s3-hh-behcet",
+  "payer": "HealthHelp",
+  "question": "Which neuroinflammatory conditions does the HealthHelp lumbar MRI guideline give as examples?",
+  "answerable": true,
+  "must_match": [
+   "Beh",
+   "sarcoidosis"
+  ],
+  "expected_sources": [
+   "HealthHelp"
+  ]
+ },
+ {
+  "id": "s3-hh-csf",
+  "payer": "HealthHelp",
+  "question": "What signs does the HealthHelp lumbar MRI guideline give as examples of a suspected cerebrospinal fluid leak?",
+  "answerable": true,
+  "must_match": [
+   "orthostatic|post lumbar puncture|rhinorrhea|otorrhea"
+  ],
+  "expected_sources": [
+   "HealthHelp"
+  ]
+ },
+ {
+  "id": "s3-hh-cauda",
+  "payer": "HealthHelp",
+  "question": "What neurological symptoms does the HealthHelp lumbar MRI guideline require alongside back pain for suspected cauda equina syndrome?",
+  "answerable": true,
+  "must_match": [
+   "bowel|bladder|saddle"
+  ],
+  "expected_sources": [
+   "HealthHelp"
+  ]
+ },
+ {
+  "id": "s3-cms-pregnancy",
+  "payer": "Medicare",
+  "question": "Does Medicare cover MRI during a viable pregnancy?",
+  "answerable": true,
+  "must_match": [
+   "not covered|non-covered|does not cover|isn.t covered"
+  ],
+  "expected_sources": [
+   "NCD 220.2"
+  ]
+ },
+ {
+  "id": "s3-cms-mra",
+  "payer": "Medicare",
+  "question": "What must MRA be used to evaluate for Medicare to cover MRA of the head and neck?",
+  "answerable": true,
+  "must_match": [
+   "carotid"
+  ],
+  "expected_sources": [
+   "NCD 220.2"
+  ]
+ },
+ {
+  "id": "s3-uhc-interqual",
+  "payer": "United Healthcare",
+  "question": "Which criteria apply for UnitedHealthcare Medicare Advantage plans that are not in the Radiology Prior Authorization and Notification Program?",
+  "answerable": true,
+  "must_match": [
+   "InterQual"
+  ],
+  "expected_sources": [
+   "MMP076"
+  ]
+ },
+ {
+  "id": "s3-uhc-delegate",
+  "payer": "United Healthcare",
+  "question": "In UnitedHealthcare Medicare Advantage plans where a delegate manages utilization management, whose requirements must be followed?",
+  "answerable": true,
+  "must_match": [
+   "delegate"
+  ],
+  "expected_sources": [
+   "MMP076"
+  ]
+ },
+ {
+  "id": "s3-na-aetna-shoulder",
+  "payer": "Aetna",
+  "question": "What does Aetna require before approving a shoulder MRI?",
+  "answerable": false,
+  "must_match": [],
+  "expected_sources": []
+ },
+ {
+  "id": "s3-na-medicare-ct",
+  "payer": "Medicare",
+  "question": "What is Medicare's national coverage policy for CT of the abdomen?",
+  "answerable": false,
+  "must_match": [],
+  "expected_sources": []
+ },
+ {
+  "id": "s3-na-bcbssc-rate",
+  "payer": "Blue Cross Blue Shield",
+  "question": "What does Blue Cross Blue Shield of South Carolina pay for a lumbar spine MRI?",
+  "answerable": false,
+  "must_match": [],
+  "expected_sources": []
+ }
+]
