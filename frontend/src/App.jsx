@@ -106,9 +106,10 @@ export default function App() {
     }
   };
 
-  const handleReset = async () => {
+  // Starts a fresh request. It must not touch saved requests: an earlier version also called /api/demo/reset here,
+  // so one click on "New request" wiped every saved request.
+  const handleReset = () => {
     stopPolling();
-    try { await apiFetch('/api/demo/reset', { method: 'POST' }); } catch {}
     setView('select'); setVertical(null); setWorkflowId(null); setWorkflowData(null);
     setMode('home');
   };

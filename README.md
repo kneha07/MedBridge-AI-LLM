@@ -170,7 +170,7 @@ The Docker files are from the hackathon version and have not been updated.
 | `GET` | `/api/workflow/{id}/status` | Status, steps and audit trail. Status `awaiting_approval` means the agent is paused. |
 | `POST` | `/api/workflow/{id}/approve` | Body: `{"approved": true, "reviewer": "...", "note": "..."}`. |
 | `GET` | `/api/workflow/history/all` | Saved requests. |
-| `POST` | `/api/demo/reset` | Clear saved requests. |
+| `POST` | `/api/demo/reset` | Clear all saved requests (reviewers only when sign-in is on). The app's buttons no longer call it; use it deliberately, for example with `curl`. |
 | `GET` | `/health` | Health check. |
 
 ---
