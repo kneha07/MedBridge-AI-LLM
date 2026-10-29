@@ -201,8 +201,6 @@ span > i { width: 6px; height: 6px; border-radius: 50%; background: #0d9488; dis
 span > i:nth-child(2) { animation-delay: .15s; }
 span > i:nth-child(3) { animation-delay: .3s; }
 button:not(:disabled):active { transform: scale(0.97); }
-.nav-tab { transition: color .2s, background .2s; }
-.nav-tab:hover { color: #18181b; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
@@ -374,9 +372,6 @@ label:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
   .app-header { padding: 0 14px !important; height: 64px !important; }
   .app-header .hdr-sub, .app-header .hdr-live { display: none !important; }
   .app-header .hdr-word { font-size: 23px !important; }
-  .nav-tabs { padding: 12px 10px 0 !important; }
-  .nav-tabs-inner { display: grid !important; grid-auto-flow: column; grid-auto-columns: 1fr; width: 100%; gap: 2px !important; }
-  .nav-tab { flex-direction: column; gap: 4px !important; padding: 8px 2px !important; font-size: 11.5px !important; line-height: 1.15; text-align: center; min-width: 0; }
   .form-grid, .scenario-grid, .result-grid, .kv-grid { grid-template-columns: 1fr !important; }
 }
 
@@ -419,3 +414,43 @@ label:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
   .lp-demo-wrap { min-width: 0; flex-basis: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { .lp-hero::after, .lp-demo-wrap { animation: none; } .lp-card, .lp-primary, .lp-secondary { transition: none; } }
+
+/* ── Main tab bar: glass segmented control with a sliding highlight ── */
+.nav-tabs { position: sticky; top: 74px; z-index: 150; display: flex; justify-content: center; padding: 14px 12px 0; pointer-events: none; }
+.nav-tabs-inner { position: relative; display: inline-flex; gap: 2px; padding: 5px; pointer-events: auto; border-radius: 999px; background: rgba(255,255,255,0.8); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(231,229,228,0.95); box-shadow: 0 10px 28px -12px rgba(15,23,42,0.22), 0 1px 2px rgba(15,23,42,0.05); }
+.nav-pill { position: absolute; z-index: 0; border-radius: 999px; background: linear-gradient(135deg, #17171d, #2a2a33); box-shadow: 0 8px 18px -6px rgba(15,23,42,0.5), inset 0 1px 0 rgba(255,255,255,0.14);
+  transition: left .38s var(--ease), top .38s var(--ease), width .38s var(--ease), height .38s var(--ease); }
+.nav-tab { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 8px; border: none; background: transparent; cursor: pointer; padding: 10px 18px; border-radius: 999px; font-size: 14px; font-weight: 700; color: #71717a; transition: color .2s, background .2s; }
+.nav-tab:hover:not([aria-current]) { color: #0f766e; background: rgba(13,148,136,0.09); }
+.nav-tab[aria-current="page"] { color: #fff; }
+.nav-tab[aria-current="page"] svg { color: #5eead4; }
+.nav-tab.no-pill[aria-current="page"] { background: linear-gradient(135deg, #17171d, #2a2a33); }  /* first paint, before the highlight is measured */
+@media (max-width: 640px) {
+  .nav-tabs { top: 64px; padding: 10px 10px 0; }
+  .nav-tabs-inner { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; width: 100%; border-radius: 20px; gap: 2px; padding: 4px; }
+  .nav-pill { border-radius: 16px; }
+  .nav-tab { flex-direction: column; gap: 4px; padding: 8px 2px; border-radius: 16px; font-size: 11.5px; line-height: 1.15; text-align: center; min-width: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .nav-pill, .nav-tab { transition: none; } }
+
+/* ── Request form sections ── */
+.form-section { margin-bottom: 26px; }
+.form-sec-head { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #0f766e; }
+.form-sec-head span { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; letter-spacing: 0; color: #fff; background: linear-gradient(135deg, #0f766e, #0891b2); }
+.form-sec-head::after { content: ''; height: 1px; flex: 1; background: linear-gradient(90deg, #ccfbf1, transparent); }
+
+/* ── Progress screen ── */
+.pv-progress { margin: -4px 0 22px; }
+.pv-bar-label { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: #52525b; margin-bottom: 8px; }
+.pv-bar { height: 8px; border-radius: 99px; background: #e7e5e4; overflow: hidden; }
+.pv-bar i { display: block; height: 100%; border-radius: 99px; transition: width .7s var(--ease), background .3s; background: linear-gradient(90deg, #14b8a6, #0ea5e9); }
+.pv-bar.amber i { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.pv-bar.green i { background: linear-gradient(90deg, #16a34a, #34d399); }
+.pv-bar.grey i { background: #a1a1aa; }
+.pv-confirm { position: relative; overflow: hidden; background: linear-gradient(180deg, #f0fdf4, #fff 70%); border: 1px solid #bbf7d0; border-radius: 20px; padding: 22px 26px 20px; margin-bottom: 24px; box-shadow: 0 14px 34px -16px rgba(22,163,74,0.35); }
+.pv-confirm::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: linear-gradient(90deg, #16a34a, #14b8a6); }
+.pv-copy { border: 1px solid #bbf7d0; background: white; color: #166534; font-weight: 700; font-size: 13px; padding: 6px 14px; border-radius: 999px; cursor: pointer; transition: background .15s; }
+.pv-copy:hover { background: #f0fdf4; }
+.pv-steps { background: rgba(255,255,255,0.9); border: 1px solid #e7e5e4; border-radius: 20px; padding: 4px 24px; box-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 14px 34px -16px rgba(15,23,42,0.12); }
+.pv-new { padding: 14px 28px; border-radius: 14px; border: none; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; background: linear-gradient(135deg, #0f766e, #0d9488 55%, #0891b2); box-shadow: 0 12px 28px -8px rgba(13,148,136,0.6), inset 0 1px 0 rgba(255,255,255,0.25); }
+@media (prefers-reduced-motion: reduce) { .pv-bar i { transition: none; } }

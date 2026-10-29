@@ -85,6 +85,48 @@ export default function WorkflowForm({ vertical, onSubmit, onBack, loading }) {
     onSubmit(finalForm, 'groq');
   };
 
+  // Group the server-provided fields so the form reads as four short steps; anything unknown goes in a last section.
+  const SECTION_DEFS = [
+    ['Patient', ['patient_name', 'patient_dob', 'patient_id']],
+    ['Insurance', ['insurance_provider', 'insurance_id']],
+    ['Service requested', ['treatment_type', 'diagnosis_code', 'treatment_description']],
+    ['Ordering physician', ['requesting_physician', 'physician_npi']],
+  ];
+  const known = new Set(SECTION_DEFS.flatMap(([, keys]) => keys));
+  const sections = [
+    ...SECTION_DEFS.map(([title, keys]) => ({ title, fields: keys.map(k => visibleFields.find(f => f.key === k)).filter(Boolean) })),
+    { title: 'More details', fields: visibleFields.filter(f => !known.has(f.key)) },
+  ].filter(sec => sec.fields.length);
+
+  const renderField = (f) => (
+
+    <div key={f.key} style={{ gridColumn: f.type === 'textarea' ? '1 / -1' : 'auto' }}>
+                <Field label={f.label} required={f.required} action={canDictate(f) ? <MicButton label={f.label} onText={dictate(f.key)} /> : null}>
+                  {f.type === 'select' ? (
+                    <SelectField value={form[f.key] || ''} onChange={upd(f.key)} options={f.options} />
+                  ) : f.type === 'textarea' ? (
+                    <textarea
+                      required={f.required} rows={3}
+                      value={form[f.key] || ''}
+                      onChange={upd(f.key)}
+                      placeholder={f.placeholder}
+                      style={{
+                        width: '100%', padding: '11px 14px',
+                        border: '1.5px solid #e7e5e4', borderRadius: '10px',
+                        fontSize: '15.5px', color: '#18181b', resize: 'vertical',
+                        lineHeight: '1.6', transition: 'all 0.2s',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                      }}
+                      onFocus={e => { e.target.style.borderColor = '#0d9488'; e.target.style.boxShadow = '0 0 0 3px rgba(13,148,136,0.12)'; }}
+                      onBlur={e => { e.target.style.borderColor = '#e7e5e4'; e.target.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'; }}
+                    />
+                  ) : (
+                    <Input required={f.required} type={f.type} value={form[f.key] || ''} onChange={upd(f.key)} placeholder={f.placeholder} />
+                  )}
+                </Field>
+              </div>
+  );
+
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '36px 24px' }}>
 
@@ -127,35 +169,15 @@ export default function WorkflowForm({ vertical, onSubmit, onBack, loading }) {
         <form onSubmit={handleSubmit} style={{ padding: '32px 36px' }}>
 
           {/* Dynamic fields */}
-          <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
-            {visibleFields.map(f => (
-              <div key={f.key} style={{ gridColumn: f.type === 'textarea' ? '1 / -1' : 'auto' }}>
-                <Field label={f.label} required={f.required} action={canDictate(f) ? <MicButton label={f.label} onText={dictate(f.key)} /> : null}>
-                  {f.type === 'select' ? (
-                    <SelectField value={form[f.key] || ''} onChange={upd(f.key)} options={f.options} />
-                  ) : f.type === 'textarea' ? (
-                    <textarea
-                      required={f.required} rows={3}
-                      value={form[f.key] || ''}
-                      onChange={upd(f.key)}
-                      placeholder={f.placeholder}
-                      style={{
-                        width: '100%', padding: '11px 14px',
-                        border: '1.5px solid #e7e5e4', borderRadius: '10px',
-                        fontSize: '15.5px', color: '#18181b', resize: 'vertical',
-                        lineHeight: '1.6', transition: 'all 0.2s',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                      }}
-                      onFocus={e => { e.target.style.borderColor = '#0d9488'; e.target.style.boxShadow = '0 0 0 3px rgba(13,148,136,0.12)'; }}
-                      onBlur={e => { e.target.style.borderColor = '#e7e5e4'; e.target.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'; }}
-                    />
-                  ) : (
-                    <Input required={f.required} type={f.type} value={form[f.key] || ''} onChange={upd(f.key)} placeholder={f.placeholder} />
-                  )}
-                </Field>
+          {/* Dynamic fields, grouped into short sections */}
+          {sections.map((sec, n) => (
+            <section key={sec.title} className="form-section" aria-labelledby={`sec-${n}`}>
+              <h3 id={`sec-${n}`} className="form-sec-head"><span aria-hidden="true">{n + 1}</span>{sec.title}</h3>
+              <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                {sec.fields.map(renderField)}
               </div>
-            ))}
-          </div>
+            </section>
+          ))}
 
           <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, #e7e5e4 20%, #e7e5e4 80%, transparent)', margin: '4px 0 28px' }} />
 
@@ -199,15 +221,15 @@ export default function WorkflowForm({ vertical, onSubmit, onBack, loading }) {
             type="submit" disabled={loading}
             style={{
               width: '100%', padding: '16px',
-              background: loading ? '#a1a1aa' : 'linear-gradient(180deg,#2a2a31,#0e0e12)',
+              background: loading ? '#a1a1aa' : 'linear-gradient(135deg,#0f766e,#0d9488 55%,#0891b2)',
               color: 'white', border: 'none', borderRadius: '14px',
               fontSize: '15px', fontWeight: '800', cursor: loading ? 'not-allowed' : 'pointer',
-              boxShadow: loading ? 'none' : '0 8px 24px rgba(24,24,27,0.25)',
+              boxShadow: loading ? 'none' : '0 12px 28px -8px rgba(13,148,136,0.6), inset 0 1px 0 rgba(255,255,255,0.25)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
               transition: 'all 0.25s', position: 'relative', overflow: 'hidden',
             }}
-            onMouseEnter={e => { if (!loading) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(24,24,27,0.32)'; } }}
-            onMouseLeave={e => { if (!loading) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(24,24,27,0.25)'; } }}
+            onMouseEnter={e => { if (!loading) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 34px -8px rgba(13,148,136,0.7), inset 0 1px 0 rgba(255,255,255,0.25)'; } }}
+            onMouseLeave={e => { if (!loading) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 12px 28px -8px rgba(13,148,136,0.6), inset 0 1px 0 rgba(255,255,255,0.25)'; } }}
           >
             {!loading && <div className="shimmer-overlay" />}
             {loading ? (

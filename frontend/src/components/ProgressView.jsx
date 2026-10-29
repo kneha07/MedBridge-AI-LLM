@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ApprovalCard, AuditTrail } from './ReviewPanels';
 import Icon from './Icon';
 
@@ -103,6 +104,14 @@ export default function ProgressView({ workflowData, onDecide, onStartNew, user 
   const stopped = status === 'needs_info' || status === 'rejected';
   const confirmation = byName['Submitting to Payer Portal']?.data?.confirmation_number;
   const f = workflowData?.form_data || {};
+  const [copied, setCopied] = useState(false);
+  const doneCount = names.filter(n => byName[n]?.status === 'done').length;
+  const pct = status === 'submitted' ? 100 : Math.round((doneCount / names.length) * 100);
+  const tone = stopped ? 'grey' : status === 'awaiting_approval' ? 'amber' : status === 'submitted' ? 'green' : 'teal';
+  const barLabel = status === 'submitted' ? 'All steps done' : stopped ? `Stopped after ${doneCount} of ${names.length} steps` : status === 'awaiting_approval' ? `${doneCount} of ${names.length} steps done, waiting for you` : `${doneCount} of ${names.length} steps done`;
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(confirmation); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch { /* clipboard blocked: the number is still on screen */ }
+  };
 
   return (
     <div style={{ maxWidth: 780, margin: '0 auto', padding: '32px 20px 56px' }}>
@@ -114,12 +123,20 @@ export default function ProgressView({ workflowData, onDecide, onStartNew, user 
         </div>
       </div>
 
+      <div className="pv-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={barLabel}>
+        <div className="pv-bar-label"><span>{barLabel}</span><span>{pct}%</span></div>
+        <div className={`pv-bar ${tone}`}><i style={{ width: `${pct}%` }} /></div>
+      </div>
+
       {status === 'awaiting_approval' && <ApprovalCard workflow={workflowData} onDecide={onDecide} user={user} />}
 
       {status === 'submitted' && (
-        <section aria-label="Submission summary" style={{ background: 'white', border: '1px solid #bbf7d0', borderRadius: 16, padding: '20px 24px', marginBottom: 24 }}>
+        <section aria-label="Submission summary" className="pv-confirm">
           <div style={{ fontSize: 14, color: '#52525b', fontWeight: 600 }}>Confirmation number <span style={{ color: '#92400e' }}>(simulated)</span></div>
-          <div style={{ fontSize: 28, fontWeight: 800, fontFamily: 'ui-monospace, monospace', letterSpacing: 1, color: '#18181b', margin: '4px 0 14px' }}>{confirmation || '—'}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', margin: '4px 0 14px' }}>
+            <div style={{ fontSize: 28, fontWeight: 800, fontFamily: 'ui-monospace, monospace', letterSpacing: 1, color: '#18181b' }}>{confirmation || '—'}</div>
+            {confirmation && <button type="button" className="pv-copy" onClick={copy}>{copied ? 'Copied' : 'Copy'}</button>}
+          </div>
           <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap', fontSize: 15, color: '#3f3f46' }}>
             <span><strong>Patient</strong> {f.patient_name}</span>
             <span><strong>Payer</strong> {f.insurance_provider}</span>
@@ -128,7 +145,7 @@ export default function ProgressView({ workflowData, onDecide, onStartNew, user 
         </section>
       )}
 
-      <section aria-label="Steps" style={{ background: 'white', border: '1px solid #e7e5e4', borderRadius: 16, padding: '4px 24px', boxShadow: '0 1px 3px rgba(15,23,42,0.05)' }}>
+      <section aria-label="Steps" className="pv-steps">
         <ol style={{ listStyle: 'none', margin: 0, padding: 0 }}>
           {names.map((n, i) => <Step key={n} name={n} step={byName[n]} stopped={stopped} first={i === 0} last={i === names.length - 1} />)}
         </ol>
@@ -138,7 +155,7 @@ export default function ProgressView({ workflowData, onDecide, onStartNew, user 
 
       {['submitted', 'rejected', 'needs_info'].includes(status) && (
         <div style={{ marginTop: 28 }}>
-          <button onClick={onStartNew} className="lift" style={{ padding: '14px 28px', borderRadius: 12, border: 'none', background: '#17171d', color: 'white', fontSize: 16, fontWeight: 700, cursor: 'pointer' }}>
+          <button onClick={onStartNew} className="lift pv-new">
             Start a new request
           </button>
         </div>
