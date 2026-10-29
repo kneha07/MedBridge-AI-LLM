@@ -55,6 +55,14 @@ def build_user_message(vertical_id: str, form_data: dict) -> str:
     return f"Process the following {v.VERTICAL_NAME} request:\n\n{fields}{scenario_note}\n\nComplete all steps now."
 
 
+UI_ONLY_KEYS = ("fhir_bundle", "fhir_claim_response")  # shown in the UI, not needed by the model
+
+
+def for_model(result: dict) -> dict:
+    """The tool result the model sees: without the large FHIR payloads, which only the UI displays."""
+    return {k: v for k, v in result.items() if k not in UI_ONLY_KEYS}
+
+
 async def _fire_callback(tool_name: str, status: str, vertical, result: dict | None, callback: Callable):
     display = vertical.STEP_DISPLAY.get(tool_name, (tool_name, "Processing...", "Complete"))
     display_name, running_msg, done_msg = display
@@ -77,6 +85,10 @@ async def _fire_callback(tool_name: str, status: str, vertical, result: dict | N
                     summary[k] = v
                 if len(summary) >= 5:
                     break
+
+        for key in UI_ONLY_KEYS:  # structured payloads for the UI's FHIR viewer
+            if result and result.get(key):
+                summary[key] = result[key]
 
         if result and result.get("policy_evidence"):
             summary["policy_passages"] = [{"source": e["source"], "url": e.get("url", ""), "passage": e["passage"][:1200]}
@@ -123,7 +135,7 @@ async def run_agent_claude(vertical_id: str, form_data: dict, callback: Callable
                 await _fire_callback(tu.name, "running", vertical, None, callback)
                 result = await vertical.execute_tool(tu.name, tu.input)
                 await _fire_callback(tu.name, "done", vertical, result, callback)
-                tool_results.append({"type": "tool_result", "tool_use_id": tu.id, "content": json.dumps(result)})
+                tool_results.append({"type": "tool_result", "tool_use_id": tu.id, "content": json.dumps(for_model(result))})
 
             messages.append({"role": "user", "content": tool_results})
 
@@ -186,7 +198,7 @@ async def run_agent_groq(vertical_id: str, form_data: dict, callback: Callable, 
             result = await vertical.execute_tool(tool_name, tool_input)
             await _fire_callback(tool_name, "done", vertical, result, callback)
 
-            messages.append({"role": "tool", "tool_call_id": tc.id, "content": json.dumps(result)})
+            messages.append({"role": "tool", "tool_call_id": tc.id, "content": json.dumps(for_model(result))})
 
 
 async def run_agent(vertical_id: str, ai_provider: str, form_data: dict, callback: Callable,

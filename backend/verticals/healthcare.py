@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from contextvars import ContextVar
 
 import db
+import fhir_mock
 VERTICAL_ID = "healthcare"
 VERTICAL_NAME = "Prior Authorization"
 VERTICAL_DESCRIPTION = "Automate insurance prior authorization for any treatment — including denial detection and auto-appeal"
@@ -147,6 +148,7 @@ DEMO_DATA = {
 # Per-run form data — set by agent_runner before tool calls. A ContextVar is scoped to the
 # asyncio task, so concurrent runs with different scenarios no longer overwrite each other.
 _current_form_data: ContextVar[dict] = ContextVar("current_form_data", default={})
+_current_bundle: ContextVar[dict | None] = ContextVar("current_bundle", default=None)  # FHIR request sent in this run
 
 def set_form_data(data: dict):
     _current_form_data.set(data)
@@ -170,16 +172,18 @@ async def execute_tool(tool_name: str, tool_input: dict) -> dict:
     is_denial_scenario = _current_form_data.get().get("demo_scenario") == "Denial + Auto-Appeal"
 
     if tool_name == "scan_insurance_policy":
+        payer = tool_input.get("insurance_provider", "")
+        evidence = retrieve_policy_evidence(payer, tool_input.get("treatment_type", ""),
+                                            _current_form_data.get().get("diagnosis_code", ""))
+        # Only retrieved passages are reported as policy content: no coverage rules are asserted that
+        # a source document does not support. Portal and submission method are simulated.
         return {
-            "prior_auth_required": True,
-            "coverage_requirements": ["Medical necessity documentation required", "Conservative treatment failed ≥6 weeks", "In-network facility required"],
-            "required_documents": ["PA request form", "Letter of medical necessity", "Office visit notes", "Prior treatment records"],
-            "clinical_criteria": ["Persistent symptoms unresponsive to conservative care", "Neurological deficits present", "Structural injury suspected"],
-            "payer_portal": "Aetna NaviNet Provider Portal",
-            "submission_method": "EDI 278",
-            "policy_evidence": retrieve_policy_evidence(
-                tool_input.get("insurance_provider", ""), tool_input.get("treatment_type", ""),
-                _current_form_data.get().get("diagnosis_code", "")),
+            "policy_evidence": evidence,
+            "policy_documents_found": len(evidence),
+            "note": ("No policy document for this payer is in the corpus; do not assume its criteria."
+                     if not evidence else "Cite only the passages above."),
+            "payer_portal": f"{payer or 'Payer'} provider portal (simulated)",
+            "submission_method": "EDI 278 (simulated)",
         }
     elif tool_name == "analyze_medical_records":
         record = db.get_patient_record(tool_input.get("patient_id", ""))
@@ -216,20 +220,27 @@ async def execute_tool(tool_name: str, tool_input: dict) -> dict:
     elif tool_name == "submit_authorization":
         provider = tool_input.get("insurance_provider", "INS")
         code = {"Aetna": "AET", "Blue Cross Blue Shield": "BCBS", "United Healthcare": "UHC", "Cigna": "CGN", "Humana": "HUM"}.get(provider, "INS")
+        form = _current_form_data.get()
+        bundle = fhir_mock.build_request_bundle(form)
+        _current_bundle.set(bundle)
         return {
             "submission_id": f"SUB-{uuid.uuid4().hex[:10].upper()}",
             "submitted_at": datetime.utcnow().isoformat(),
             "expected_response_by": (datetime.utcnow() + timedelta(days=5)).strftime("%Y-%m-%d"),
             "confirmation_number": f"{code}-{datetime.utcnow().year}-PRI-{uuid.uuid4().int % 900000 + 100000}",
-            "portal": "Aetna NaviNet",
-            "transmission": "EDI 278 — Accepted",
+            "portal": f"{provider} provider portal (simulated)",
+            "transmission": "FHIR-shaped Claim bundle (simulated, not sent)",
+            "fhir_bundle": bundle,
         }
     elif tool_name == "track_authorization_status":
+        bundle = _current_bundle.get() or fhir_mock.build_request_bundle(_current_form_data.get())
         if is_denial_scenario:
+            reason = "Not medically necessary — insufficient documentation of conservative treatment failure"
             return {
                 "current_status": "DENIED",
-                "denial_reason": "Not medically necessary — insufficient documentation of conservative treatment failure",
+                "denial_reason": reason,
                 "denial_code": "CO-50",
+                "fhir_claim_response": fhir_mock.build_claim_response(bundle, "error", reason, "CO-50"),
                 "appeal_deadline": (datetime.utcnow() + timedelta(days=30)).strftime("%Y-%m-%d"),
                 "appeal_rights": "You have 30 days to file a formal appeal with additional clinical evidence",
                 "auto_appeal_available": True,
@@ -239,6 +250,7 @@ async def execute_tool(tool_name: str, tool_input: dict) -> dict:
             "estimated_decision_date": (datetime.utcnow() + timedelta(days=3)).strftime("%Y-%m-%d"),
             "next_action": "Clinical review by insurance medical director within 48 hours",
             "real_time_tracking": "Active",
+            "fhir_claim_response": fhir_mock.build_claim_response(bundle, "queued"),
             "alert_configured": "Email + SMS on decision",
         }
     elif tool_name == "draft_appeal":

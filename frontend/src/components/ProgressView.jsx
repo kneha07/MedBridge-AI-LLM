@@ -15,7 +15,7 @@ const LABELS = {
   appeal_deadline: 'Appeal deadline', appeal_rights: 'Appeal rights', appeal_id: 'Appeal ID', status: 'Status',
   policy_citations: 'Policy cited',
 };
-const HIDE = new Set(['appeal_letter_preview', 'supporting_evidence_attached', 'next_step', 'notes', 'auto_appeal_available', 'policy_passages']);
+const HIDE = new Set(['appeal_letter_preview', 'supporting_evidence_attached', 'next_step', 'notes', 'auto_appeal_available', 'policy_passages', 'fhir_bundle', 'fhir_claim_response']);
 
 const label = (k) => LABELS[k] || k.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase());
 const fmt = (k, v) => (k === 'completeness_score' && typeof v === 'number') ? `${Math.round(v * 100)}%`
@@ -32,6 +32,7 @@ function Step({ name, step, stopped, first, last }) {
   const state = step ? (step.status === 'done' ? 'done' : 'running') : 'waiting';
   const rows = step?.data ? Object.entries(step.data).filter(([k]) => !HIDE.has(k)) : [];
   const letter = step?.data?.appeal_letter_preview;
+  const fhir = step?.data?.fhir_bundle || step?.data?.fhir_claim_response;
   const text = step ? step.message : stopped ? 'Not run' : 'Waiting';
   return (
     <li style={{ position: 'relative', display: 'flex', gap: 14, padding: '16px 0 ' + (last ? '16px' : '20px') }}>
@@ -55,6 +56,16 @@ function Step({ name, step, stopped, first, last }) {
               </ul>
             )}
           </div>
+        )}
+        {fhir && (
+          <details style={{ marginTop: 8 }}>
+            <summary style={{ cursor: 'pointer', fontSize: 14, fontWeight: 600, color: '#0f766e' }}>
+              {step.data.fhir_bundle ? 'FHIR request message' : 'FHIR response message'} (simulated, not sent)
+            </summary>
+            <pre tabIndex={0} aria-label="FHIR JSON" style={{ margin: '8px 0 0', padding: '12px 14px', background: '#18181b', color: '#e7e5e4', borderRadius: 12, fontSize: 12.5, lineHeight: 1.5, maxHeight: 320, overflow: 'auto' }}>
+              {JSON.stringify(fhir, null, 2)}
+            </pre>
+          </details>
         )}
         {rows.length > 0 && (
           <details style={{ marginTop: 8 }}>
@@ -83,7 +94,7 @@ const HEAD = {
   needs_info: ['alert', 'Stopped before finishing', null, '#991b1b'],
 };
 
-export default function ProgressView({ workflowData, onDecide, onStartNew }) {
+export default function ProgressView({ workflowData, onDecide, onStartNew, user }) {
   const status = workflowData?.status || 'pending';
   const [icon, title, sub, color] = HEAD[status] || HEAD.pending;
   const steps = workflowData?.steps || [];
@@ -103,7 +114,7 @@ export default function ProgressView({ workflowData, onDecide, onStartNew }) {
         </div>
       </div>
 
-      {status === 'awaiting_approval' && <ApprovalCard workflow={workflowData} onDecide={onDecide} />}
+      {status === 'awaiting_approval' && <ApprovalCard workflow={workflowData} onDecide={onDecide} user={user} />}
 
       {status === 'submitted' && (
         <section aria-label="Submission summary" style={{ background: 'white', border: '1px solid #bbf7d0', borderRadius: 16, padding: '20px 24px', marginBottom: 24 }}>
