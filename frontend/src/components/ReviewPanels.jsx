@@ -77,9 +77,9 @@ export function ApprovalCard({ workflow, onDecide, user }) {
   return (
     <div style={card} className="fade-up">
       <div style={{ ...panel, border: '1px solid #fcd34d', boxShadow: '0 12px 40px rgba(245,158,11,0.18)' }}>
-        <div style={{ padding: '18px 24px', background: 'linear-gradient(135deg,#fffbeb,#fef3c7)', borderBottom: '1px solid #fde68a', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#f59e0b', animation: 'pulse 1.5s infinite' }} />
-          <div>
+        <div style={{ padding: '18px 24px', background: 'linear-gradient(135deg,#fffbeb,#fef3c7)', borderBottom: '1px solid #fde68a', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#f59e0b', animation: 'pulse 1.5s infinite', flexShrink: 0 }} />
+          <div style={{ flex: '1 1 220px', minWidth: 0 }}>
             <div style={{ fontWeight: 800, color: '#92400e', fontSize: 18 }}>Human review required before submission</div>
             <div style={{ fontSize: 15, color: '#92400e' }}>Check the details below, then approve or reject.</div>
           </div>
