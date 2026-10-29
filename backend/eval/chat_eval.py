@@ -33,8 +33,11 @@ REFUSAL = re.compile(r"does not contain|do not contain|doesn.t contain|not (?:co
 BASELINE_SYSTEM = "You are a prior-authorization assistant for clinic staff. Answer concisely."
 
 
+QUESTIONS_FILE = HERE / "chat_questions.json"
+
+
 def load_questions():
-    return json.loads((HERE / "chat_questions.json").read_text())
+    return json.loads(QUESTIONS_FILE.read_text())
 
 
 def doc_text(title_part: str) -> str:
@@ -142,6 +145,7 @@ def summarize(rows):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
+    ap.add_argument("--questions", default="chat_questions.json", help="question file in eval/ (e.g. chat_questions_heldout.json)")
     ap.add_argument("--check-key", action="store_true")
     ap.add_argument("--provider", default=os.environ.get("AI_PROVIDER", "groq"))
     ap.add_argument("--mode", choices=["rag", "baseline", "static", "both"], default="both")
@@ -149,11 +153,13 @@ if __name__ == "__main__":
     ap.add_argument("--offset", type=int, default=0)
     ap.add_argument("--resume", action="store_true", help="re-run only the questions that errored in the saved full run")
     a = ap.parse_args()
+    QUESTIONS_FILE = HERE / a.questions
+    tag = "" if a.questions == "chat_questions.json" else "_" + Path(a.questions).stem.replace("chat_questions_", "")  # keeps result files apart
     if a.check_key:
         raise SystemExit(0 if check_key() else 1)
     (HERE / "results").mkdir(exist_ok=True)
     for mode in (["rag", "baseline"] if a.mode == "both" else [a.mode]):
-        full = HERE / "results" / f"chat_{a.provider}_{mode}_full.json"
+        full = HERE / "results" / f"chat_{a.provider}_{mode}{tag}_full.json"
         if a.resume and full.exists():
             old = json.loads(full.read_text())["rows"]
             redo = {r["id"] for r in old if r["error"]}

@@ -1,0 +1,234 @@
+[
+ {
+  "id": "h-aetna-bonemri",
+  "payer": "Aetna",
+  "question": "Does Aetna consider BoneMRI (MRI-based synthetic CT) medically necessary for pre-operative spine planning?",
+  "answerable": true,
+  "must_match": [
+   "experimental|investigational|unproven"
+  ],
+  "expected_sources": [
+   "CPB 0236"
+  ]
+ },
+ {
+  "id": "h-aetna-epidural",
+  "payer": "Aetna",
+  "question": "When does Aetna consider spine MRI or CT medically necessary before an epidural injection?",
+  "answerable": true,
+  "must_match": [
+   "tumor",
+   "infection"
+  ],
+  "expected_sources": [
+   "CPB 0236"
+  ]
+ },
+ {
+  "id": "h-aetna-knee-ra",
+  "payer": "Aetna",
+  "question": "Does Aetna cover knee MRI to diagnose rheumatoid arthritis or degenerative joint disease?",
+  "answerable": true,
+  "must_match": [
+   "experimental|investigational|unproven"
+  ],
+  "expected_sources": [
+   "CPB 0171"
+  ]
+ },
+ {
+  "id": "h-aetna-morton",
+  "payer": "Aetna",
+  "question": "When does Aetna cover MRI for a Morton neuroma?",
+  "answerable": true,
+  "must_match": [
+   "pre-?operative|surgical|surgery",
+   "x-?ray"
+  ],
+  "expected_sources": [
+   "CPB 0171"
+  ]
+ },
+ {
+  "id": "h-aetna-positional",
+  "payer": "Aetna",
+  "question": "Does Aetna cover repeat MRI scans done in different positions, such as flexion and extension?",
+  "answerable": true,
+  "must_match": [
+   "experimental|investigational|unproven"
+  ],
+  "expected_sources": [
+   "CPB 0093"
+  ]
+ },
+ {
+  "id": "h-aetna-mckenzie",
+  "payer": "Aetna",
+  "question": "Does Aetna consider it medically necessary to go out of network for McKenzie Method physical therapy?",
+  "answerable": true,
+  "must_match": [
+   "in-?network|in network"
+  ],
+  "expected_sources": [
+   "CPB 0325"
+  ]
+ },
+ {
+  "id": "h-cms-clips",
+  "payer": "Medicare",
+  "question": "Does Medicare cover MRI for a patient with metallic clips on a vascular aneurysm?",
+  "answerable": true,
+  "must_match": [
+   "not covered|non-covered|isn.t covered|does not cover"
+  ],
+  "expected_sources": [
+   "NCD 220.2"
+  ]
+ },
+ {
+  "id": "h-cms-disc",
+  "payer": "Medicare",
+  "question": "Does Medicare require other imaging to be tried first before covering MRI to diagnose disc disease?",
+  "answerable": true,
+  "must_match": [
+   "without regard|regardless|not require|no requirement|need not|does not require|not necessary"
+  ],
+  "expected_sources": [
+   "NCD 220.2"
+  ]
+ },
+ {
+  "id": "h-uhc-24h",
+  "payer": "United Healthcare",
+  "question": "Under UnitedHealthcare Commercial's MRI site-of-service policy, when does a hospital outpatient MRI qualify because of a specialist appointment?",
+  "answerable": true,
+  "must_match": [
+   "24 hours"
+  ],
+  "expected_sources": [
+   "MP.13.20"
+  ]
+ },
+ {
+  "id": "h-uhc-states",
+  "payer": "United Healthcare",
+  "question": "In which states does UnitedHealthcare's MRI and CT site-of-service policy not apply to Individual Exchange plans?",
+  "answerable": true,
+  "must_match": [
+   "Illinois",
+   "Maryland",
+   "Massachusetts",
+   "Texas",
+   "Wisconsin"
+  ],
+  "expected_sources": [
+   "MP.13.20"
+  ]
+ },
+ {
+  "id": "h-cigna-open",
+  "payer": "Cigna",
+  "question": "When does Cigna's site-of-care policy accept a hospital-based MRI because an open MRI is needed?",
+  "answerable": true,
+  "must_match": [
+   "unsafe|intolerable|impractical",
+   "open"
+  ],
+  "expected_sources": [
+   "Cigna Medical Coverage Policy 0550"
+  ]
+ },
+ {
+  "id": "h-cigna-transplant",
+  "payer": "Cigna",
+  "question": "Does Cigna's site-of-care policy accept hospital-based imaging related to transplantation?",
+  "answerable": true,
+  "must_match": [
+   "approved transplant"
+  ],
+  "expected_sources": [
+   "Cigna Medical Coverage Policy 0550"
+  ]
+ },
+ {
+  "id": "h-bcbssc-postop",
+  "payer": "Blue Cross Blue Shield",
+  "question": "Under the Blue Cross Blue Shield of South Carolina lumbar MRI policy, how long after surgery should advanced imaging wait to evaluate pseudarthrosis or a hardware complication?",
+  "answerable": true,
+  "must_match": [
+   "6 months|six months"
+  ],
+  "expected_sources": [
+   "CAM 709"
+  ]
+ },
+ {
+  "id": "h-bcbsla-contrast",
+  "payer": "Blue Cross Blue Shield",
+  "question": "In Blue Cross Blue Shield of Louisiana's Medicare Advantage lumbar MRI policy, when is contrast indicated within the study of the spine?",
+  "answerable": true,
+  "must_match": [
+   "recurrent disc|scar"
+  ],
+  "expected_sources": [
+   "MNG-018"
+  ]
+ },
+ {
+  "id": "h-hh-emg",
+  "payer": "HealthHelp",
+  "question": "In the HealthHelp lumbar MRI guideline, is an EMG recommended to determine the cause of axial lumbar spine pain?",
+  "answerable": true,
+  "must_match": [
+   "not recommended"
+  ],
+  "expected_sources": [
+   "HealthHelp"
+  ]
+ },
+ {
+  "id": "h-hh-contra",
+  "payer": "HealthHelp",
+  "question": "Which implanted devices does the HealthHelp lumbar MRI guideline list as general MRI contraindications?",
+  "answerable": true,
+  "must_match": [
+   "cochlear",
+   "pace ?maker"
+  ],
+  "expected_sources": [
+   "HealthHelp"
+  ]
+ },
+ {
+  "id": "h-na-bcbsla-cervical",
+  "payer": "Blue Cross Blue Shield",
+  "question": "What does Blue Cross Blue Shield of Louisiana require before an MRI of the cervical spine?",
+  "answerable": false,
+  "must_match": [],
+  "expected_sources": []
+ },
+ {
+  "id": "h-na-uhc-pt",
+  "payer": "United Healthcare",
+  "question": "How many physical therapy visits per year does UnitedHealthcare allow?",
+  "answerable": false,
+  "must_match": [],
+  "expected_sources": []
+ },
+ {
+  "id": "h-na-cigna-bariatric",
+  "payer": "Cigna",
+  "question": "What does Cigna require for prior authorization of bariatric surgery?",
+  "answerable": false,
+  "must_match": [],
+  "expected_sources": []
+ },
+ {
+  "id": "h-na-medicaid-appeal",
+  "payer": "Medicaid",
+  "question": "What is the appeal deadline for a denied Medicaid MRI prior authorization?",
+  "answerable": false,
+  "must_match": [],
+  "expected_sources": []
+ }
+]
