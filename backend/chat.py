@@ -10,7 +10,7 @@ from agent_runner import get_groq
 from rag import store
 
 MAX_TOOL_ROUNDS = 4
-TOP_K = int(os.environ.get("CHAT_TOP_K", "6"))  # passages returned per search_policy call (4 to 8 compared in the README)
+TOP_K = int(os.environ.get("CHAT_TOP_K", "4"))  # passages returned per search_policy call (4, 6 and 8 compared in the README)
 
 SYSTEM_PROMPT = """You are MedBridge Assistant, a prior-authorization policy assistant for clinic staff.
 Rules:
