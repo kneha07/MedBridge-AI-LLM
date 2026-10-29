@@ -71,32 +71,27 @@ function AgentDemo() {
 export default function Landing({ onStart, onChat }) {
   return (
     <>
-    <div style={S.hero}>
-      <div className="drift" style={S.glow1} aria-hidden="true" /><div className="drift" style={{ ...S.glow2, animationDelay: '-7s' }} aria-hidden="true" />
-      <div style={S.inner}>
-        <div style={S.copy}>
-          <h1 className="fade-up-1" style={S.h1}>
-            Prior authorizations,<br /><span className="gradient-text">ready to review.</span>
+    <div className="lp-hero">
+      <div className="lp-inner">
+        <div className="lp-copy">
+          <h1 className="lp-h1 fade-up-1">
+            Prior authorizations,<br /><em>ready to review.</em>
           </h1>
-          <p className="fade-up-2" style={S.sub}>
+          <p className="lp-sub fade-up-2">
             Tell MedBridge about the patient and the service. It checks the insurer's own rules, fills in the request, and shows you everything before anything is sent.
           </p>
           <div className="fade-up-3" style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <button style={S.primary} onClick={onStart}>Start a request <span style={{ marginLeft: 6 }}>→</span></button>
-            <button style={S.secondary} onClick={onChat}>Ask a coverage question</button>
+            <button className="lp-primary" onClick={onStart}>Start a request <Icon name="arrow-right" size={18} /></button>
+            <button className="lp-secondary" onClick={onChat}>Ask a coverage question</button>
           </div>
-          <div className="fade-up-4" style={S.proof}>
+          <div className="lp-steps fade-up-4">
             {[['1', 'Enter the request'], ['2', "We check the insurer's policy"], ['3', 'You review and approve']].map(([n, t]) => (
-              <div key={n} style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#3f3f46', fontSize: 13.5, fontWeight: 600 }}>
-                <span style={{ width: 24, height: 24, borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: '#18181b', background: 'white', border: '1px solid #e7e5e4' }}>{n}</span>{t}
-              </div>
+              <div key={n} className="lp-step"><span>{n}</span>{t}</div>
             ))}
           </div>
-          <p className="fade-up-4" style={{ margin: '26px 0 0', color: '#a1a1aa', fontSize: 14 }}>
-            Runs on your choice of model: Groq, Claude, or Claude on Amazon Bedrock.
-          </p>
+          <p className="lp-note fade-up-4">Runs on your choice of model: Groq, Claude, or Claude on Amazon Bedrock.</p>
         </div>
-        <div className="fade-up-2" style={{ flex: '1 1 380px', minWidth: 300, maxWidth: 460 }}><AgentDemo /></div>
+        <div className="lp-demo-wrap fade-up-2"><AgentDemo /></div>
       </div>
     </div>
 
@@ -104,8 +99,8 @@ export default function Landing({ onStart, onChat }) {
       <h2 id="why-h" className="serif" style={S.h2}>Prior authorization is slow, and denials are rarely fought</h2>
       <div style={S.statGrid}>
         {STATS.map(x => (
-          <div key={x.n} style={S.stat}>
-            <div className="serif" style={S.statNum}>{x.n}</div>
+          <div key={x.n} className="lp-card lp-stat">
+            <div className="serif lp-statnum">{x.n}</div>
             <div style={S.statTxt}>{x.t}</div>
             <div style={S.statSrc}>{x.s}</div>
           </div>
@@ -117,7 +112,7 @@ export default function Landing({ onStart, onChat }) {
       <h2 id="trust-h" className="serif" style={S.h2}>Built to be trusted</h2>
       <div style={S.trustGrid}>
         {TRUST.map(x => (
-          <div key={x.title} style={S.trust}>
+          <div key={x.title} className="lp-card lp-trust">
             <span style={S.badge}><Icon name={x.icon} size={22} /></span>
             <div>
               <div style={{ fontWeight: 800, fontSize: 17, color: '#18181b' }}>{x.title}</div>
@@ -126,7 +121,18 @@ export default function Landing({ onStart, onChat }) {
           </div>
         ))}
       </div>
-      <p style={{ textAlign: 'center', color: '#71717a', fontSize: 13.5, margin: '28px 0 0' }}>
+    </section>
+
+    <section style={{ ...S.section, paddingTop: 0 }} aria-label="Get started">
+      <div className="lp-cta">
+        <h2 className="serif">See it on a real policy.</h2>
+        <p>Start with the demo patient and watch each step, then approve it yourself.</p>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+          <button className="lp-primary" onClick={onStart}>Start a request <Icon name="arrow-right" size={18} /></button>
+          <button className="lp-secondary" onClick={onChat}>Ask a coverage question</button>
+        </div>
+      </div>
+      <p style={{ textAlign: 'center', color: '#71717a', fontSize: 13.5, margin: '24px 0 0' }}>
         Research prototype. Do not use with real patient data.
       </p>
     </section>
@@ -135,30 +141,14 @@ export default function Landing({ onStart, onChat }) {
 }
 
 const S = {
-  hero: { position: 'relative', overflow: 'hidden', minHeight: 'calc(100vh - 130px)', display: 'flex', alignItems: 'center', margin: '16px 0 0',
-    background: 'transparent' },
-  glow1: { position: 'absolute', top: -120, left: '8%', width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle,rgba(16,185,129,0.28),transparent 70%)' },
-  glow2: { position: 'absolute', bottom: -160, right: '6%', width: 480, height: 480, borderRadius: '50%', background: 'radial-gradient(circle,rgba(8,145,178,0.24),transparent 70%)' },
-  inner: { position: 'relative', zIndex: 1, maxWidth: 1120, margin: '0 auto', padding: '56px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 48, flexWrap: 'wrap', width: '100%' },
-  copy: { flex: '1 1 600px', minWidth: 300 },
-  h1: { margin: '0 0 18px', fontSize: 'clamp(36px,4.8vw,58px)', lineHeight: 1.05, fontWeight: 800, letterSpacing: '-1.5px', color: '#18181b', fontFamily: "'Source Serif 4', Georgia, serif" },
   section: { maxWidth: 1120, margin: '0 auto', padding: '56px 28px' },
   h2: { fontSize: 'clamp(26px,3.2vw,36px)', fontWeight: 700, color: '#18181b', margin: '0 0 28px', lineHeight: 1.15, textAlign: 'center' },
   statGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 18 },
-  stat: { background: 'white', border: '1px solid #e7e5e4', borderRadius: 22, padding: '26px 26px 22px', boxShadow: '0 1px 2px rgba(24,24,27,0.04), 0 14px 36px -14px rgba(24,24,27,0.10)' },
-  statNum: { fontSize: 52, fontWeight: 800, color: '#0f766e', lineHeight: 1 },
   statTxt: { fontSize: 16, color: '#3f3f46', lineHeight: 1.5, margin: '12px 0 14px' },
   statSrc: { display: 'inline-block', fontSize: 12, fontWeight: 700, letterSpacing: 0.4, color: '#52525b', background: '#f5f5f4', borderRadius: 100, padding: '3px 10px' },
   trustGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,440px),1fr))', gap: 18 },
-  trust: { display: 'flex', gap: 16, alignItems: 'flex-start', background: 'white', border: '1px solid #e7e5e4', borderRadius: 22, padding: 24, boxShadow: '0 1px 2px rgba(24,24,27,0.04), 0 14px 36px -14px rgba(24,24,27,0.10)' },
   badge: { width: 46, height: 46, borderRadius: '50%', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: '#ccfbf1', color: '#0f766e' },
-  sub: { margin: '0 0 32px', fontSize: 18, lineHeight: 1.6, color: '#52525b', maxWidth: 520 },
-  primary: { padding: '15px 28px', borderRadius: 14, border: 'none', cursor: 'pointer', fontSize: 15, fontWeight: 800, color: 'white',
-    background: 'linear-gradient(180deg,#2a2a31,#0e0e12)', boxShadow: '0 10px 28px rgba(24,24,27,0.22), inset 0 1px 0 rgba(255,255,255,0.18)', transition: 'transform .2s, box-shadow .2s' },
-  secondary: { padding: '15px 24px', borderRadius: 14, cursor: 'pointer', fontSize: 15, fontWeight: 700, color: '#18181b',
-    background: 'white', border: '1px solid #e7e5e4', boxShadow: '0 1px 2px rgba(24,24,27,0.05)' },
-  proof: { display: 'flex', flexWrap: 'wrap', gap: '12px 24px', marginTop: 40 },
-  demo: { borderRadius: 22, background: 'rgba(255,255,255,0.85)', border: '1px solid #e7e5e4', backdropFilter: 'blur(18px)',
+  demo: { borderRadius: 22, background: 'rgba(255,255,255,0.97)', border: '1px solid rgba(255,255,255,0.6)',
     boxShadow: '0 30px 80px rgba(24,24,27,0.12), 0 2px 6px rgba(24,24,27,0.04)', overflow: 'hidden' },
   demoBar: { display: 'flex', alignItems: 'center', gap: 6, padding: '13px 18px', borderBottom: '1px solid #f0eeec', background: '#fafaf9' },
   dot: { width: 10, height: 10, borderRadius: '50%', display: 'inline-block' },
