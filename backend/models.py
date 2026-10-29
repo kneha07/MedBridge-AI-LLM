@@ -52,6 +52,7 @@ class WorkflowStatusResponse(BaseModel):
     result: Optional[str] = None
     form_data: Optional[dict] = None
     audit: List[dict] = []
+    submitted_by: Optional[str] = None  # signed-in user who created it, when sign-in is on
 
 
 class ApprovalRequest(BaseModel):

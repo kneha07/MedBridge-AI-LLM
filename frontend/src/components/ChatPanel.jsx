@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import Icon from './Icon';
 import CitationDrawer from './CitationDrawer';
 import Logo from './Logo';
+import { apiFetch } from '../api';
 
-const API = 'http://localhost:8000';
 
 const SUGGESTIONS = [
   { icon: 'search', text: 'Does Aetna need conservative therapy before a lumbar MRI, and are there exceptions?' },
@@ -89,7 +89,7 @@ export default function ChatPanel() {
     setInput('');
     setLoading(true);
     try {
-      const res = await fetch(`${API}/api/chat`, {
+      const res = await apiFetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: history.map(({ role, content }) => ({ role, content })) }),

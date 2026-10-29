@@ -3,12 +3,13 @@ import uuid
 from datetime import datetime
 from typing import Dict
 
-from fastapi import FastAPI, BackgroundTasks, HTTPException
+from fastapi import Depends, FastAPI, BackgroundTasks, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 load_dotenv(dotenv_path="../.env")
 
+import auth
 import db
 from models import ApprovalRequest, WorkflowRequest, WorkflowStatus, WorkflowStatusResponse, AgentStep, StepStatus, SubmitResponse
 from agent_runner import run_agent
@@ -97,13 +98,78 @@ async def process_workflow(workflow_id: str, request: WorkflowRequest):
         approvals.pop(workflow_id, None)
 
 
+class LoginRequest(BaseModel):
+    username: str
+    password: str  # the PIN for the demo accounts
+
+
+class RegisterRequest(BaseModel):
+    full_name: str
+    email: str
+    organization: str = ""
+    password: str
+
+
+class RoleRequest(BaseModel):
+    role: str
+
+
+@app.get("/api/auth/config")
+async def auth_config():
+    demo = [{"name": n, "role": r, "pin": pin} for n, (r, pin) in auth._users().items()] if auth.using_demo_accounts() else []
+    return {"enabled": auth.enabled(), "roles": list(auth.ROLES), "demo_accounts": demo, "min_password": auth.MIN_PASSWORD}
+
+
+@app.post("/api/auth/login")
+async def login(body: LoginRequest):
+    if not auth.enabled():
+        raise HTTPException(status_code=404, detail="Sign-in is not enabled")
+    token = auth.login(body.username.strip(), body.password)
+    if token is None:
+        raise HTTPException(status_code=401, detail="Wrong name or PIN")
+    user = auth.verify(token)
+    return {"token": token, "name": user.name, "display": user.display, "role": user.role}
+
+
+@app.post("/api/auth/register", status_code=201)
+async def register(body: RegisterRequest):
+    """Sign up. Always creates a staff account; only a reviewer can promote it."""
+    if not auth.enabled():
+        raise HTTPException(status_code=404, detail="Sign-in is not enabled")
+    token = auth.register(body.full_name, body.email, body.password, body.organization)
+    user = auth.verify(token)
+    return {"token": token, "name": user.name, "display": user.display, "role": user.role}
+
+
+@app.get("/api/users")
+async def users(user: auth.User | None = Depends(auth.current_user)):
+    auth.require_reviewer(user)
+    env = [{"name": n, "role": r, "created_at": None, "display": n, "organization": "", "source": "demo/config"} for n, (r, _) in auth._users().items()]
+    return env + [{**u, "source": "signed up"} for u in db.list_users()]
+
+
+@app.post("/api/users/{name}/role")
+async def set_role(name: str, body: RoleRequest, user: auth.User | None = Depends(auth.current_user)):
+    auth.require_reviewer(user)
+    if body.role not in auth.ROLES:
+        raise HTTPException(status_code=400, detail=f"Role must be one of {', '.join(auth.ROLES)}")
+    if name.lower() == user.name.lower():
+        raise HTTPException(status_code=403, detail="You cannot change your own role")
+    if name in auth._users():
+        raise HTTPException(status_code=400, detail="That account's role is set in the server configuration")
+    if not db.set_user_role(name, body.role):
+        raise HTTPException(status_code=404, detail="No such user")
+    return {"name": name, "role": body.role}
+
+
 @app.get("/api/verticals")
 async def get_verticals():
     return list_verticals()
 
 
 @app.post("/api/workflow/submit", response_model=SubmitResponse)
-async def submit_workflow(request: WorkflowRequest, background_tasks: BackgroundTasks):
+async def submit_workflow(request: WorkflowRequest, background_tasks: BackgroundTasks,
+                          user: auth.User | None = Depends(auth.current_user)):
     workflow_id = str(uuid.uuid4())
     now = datetime.utcnow().isoformat()
 
@@ -118,7 +184,8 @@ async def submit_workflow(request: WorkflowRequest, background_tasks: Background
         result=None,
         form_data=request.form_data
     )
-    log(store[workflow_id], "staff", "created")
+    store[workflow_id].submitted_by = user.name if user else None
+    log(store[workflow_id], user.label if user else "staff", "created")
 
     background_tasks.add_task(process_workflow, workflow_id, request)
 
@@ -130,27 +197,31 @@ async def submit_workflow(request: WorkflowRequest, background_tasks: Background
 
 
 @app.post("/api/workflow/{workflow_id}/approve")
-async def approve(workflow_id: str, body: ApprovalRequest):
+async def approve(workflow_id: str, body: ApprovalRequest, user: auth.User | None = Depends(auth.current_user)):
+    auth.require_reviewer(user)
     wf = store.get(workflow_id)
     pending = approvals.get(workflow_id)
     if not wf or not pending or wf.status != WorkflowStatus.awaiting_approval:
         raise HTTPException(status_code=409, detail="This request is not awaiting approval")
+    if user is not None and wf.submitted_by == user.name:
+        raise HTTPException(status_code=403, detail="A request must be approved by someone other than the person who submitted it")
+    reviewer = user.label if user else body.reviewer  # signed-in name wins over whatever the client typed
     pending["approved"] = body.approved
     wf.status = WorkflowStatus.processing
-    log(wf, body.reviewer, "approved" if body.approved else "rejected_by_reviewer", body.note)
+    log(wf, reviewer, "approved" if body.approved else "rejected_by_reviewer", body.note)
     pending["event"].set()
     return {"status": wf.status}
 
 
 @app.get("/api/workflow/{workflow_id}/status", response_model=WorkflowStatusResponse)
-async def get_status(workflow_id: str):
+async def get_status(workflow_id: str, user: auth.User | None = Depends(auth.current_user)):
     if workflow_id not in store:
         raise HTTPException(status_code=404, detail="Workflow not found")
     return store[workflow_id]
 
 
 @app.get("/api/workflow/history/all")
-async def get_history():
+async def get_history(user: auth.User | None = Depends(auth.current_user)):
     return sorted([
         {
             "workflow_id": wf.workflow_id,
@@ -166,7 +237,8 @@ async def get_history():
 
 
 @app.post("/api/demo/reset")
-async def reset():
+async def reset(user: auth.User | None = Depends(auth.current_user)):
+    auth.require_reviewer(user)
     store.clear()
     db.clear()
     return {"message": "Reset complete"}
@@ -182,7 +254,7 @@ class ChatRequest(BaseModel):
 
 
 @app.post("/api/chat")
-async def chat_endpoint(req: ChatRequest):
+async def chat_endpoint(req: ChatRequest, user: auth.User | None = Depends(auth.current_user)):
     history = [m.model_dump() for m in req.messages if m.role in ("user", "assistant")][-12:]
     if not history or history[-1]["role"] != "user":
         raise HTTPException(status_code=400, detail="Last message must be from the user")

@@ -28,10 +28,11 @@ function Check({ state, title, detail }) {
 const card = { margin: '0 0 24px' };
 const panel = { background: 'white', borderRadius: 20, border: '1px solid #e7e5e4', boxShadow: '0 8px 32px rgba(15,23,42,0.08)', overflow: 'hidden' };
 
-export function ApprovalCard({ workflow, onDecide }) {
+export function ApprovalCard({ workflow, onDecide, user }) {
   const [note, setNote] = useState('');
   const [reviewer, setReviewer] = useState('Dr. Sarah Chen');
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
   const [open, setOpen] = useState(null);
   const f = workflow?.form_data || {};
   const stepData = (name) => workflow?.steps?.find(s => s.tool_name === name && s.status === 'done')?.data || {};
@@ -62,7 +63,16 @@ export function ApprovalCard({ workflow, onDecide }) {
   ];
   const needsLook = checks.filter(c => c[1] === 'check').length;
 
-  const decide = async (approved) => { setBusy(true); await onDecide(approved, reviewer, note); setBusy(false); };
+  // With sign-in on, the server takes the reviewer from the token; these only decide what the buttons say.
+  const ownRequest = !!user && workflow?.submitted_by === user.name;
+  const blocked = user && user.role !== 'reviewer' ? 'Only a reviewer can approve or reject. Sign in as a reviewer to continue.'
+    : ownRequest ? 'You submitted this request, so someone else must approve it.' : '';
+  const decide = async (approved) => {
+    setBusy(true); setError('');
+    const problem = await onDecide(approved, user ? user.name : reviewer, note);
+    if (problem) setError(problem);
+    setBusy(false);
+  };
 
   return (
     <div style={card} className="fade-up">
@@ -113,14 +123,17 @@ export function ApprovalCard({ workflow, onDecide }) {
         </div>
         <div style={{ padding: '14px 24px 22px', display: 'grid', gap: 12 }}>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            <input value={reviewer} onChange={e => setReviewer(e.target.value)} aria-label="Reviewer name" placeholder="Reviewer"
-              style={{ flex: '0 0 200px', padding: '12px 14px', border: '1px solid #d4d4d8', borderRadius: 12, fontSize: 15 }} />
+            {user
+              ? <div style={{ flex: '0 0 200px', padding: '12px 14px', border: '1px solid #e7e5e4', background: '#fafaf9', borderRadius: 12, fontSize: 15 }}>Reviewer: <strong>{user.display || user.name}</strong></div>
+              : <input value={reviewer} onChange={e => setReviewer(e.target.value)} aria-label="Reviewer name" placeholder="Reviewer"
+                  style={{ flex: '0 0 200px', padding: '12px 14px', border: '1px solid #d4d4d8', borderRadius: 12, fontSize: 15 }} />}
             <input value={note} onChange={e => setNote(e.target.value)} aria-label="Reviewer note" placeholder="Optional note"
               style={{ flex: 1, minWidth: 200, padding: '12px 14px', border: '1px solid #d4d4d8', borderRadius: 12, fontSize: 15 }} />
           </div>
+          {(blocked || error) && <div role="alert" style={{ color: '#92400e', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, padding: '10px 14px', fontSize: 14.5, fontWeight: 600 }}>{blocked || error}</div>}
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-            <button disabled={busy} onClick={() => decide(false)} style={{ padding: '13px 24px', borderRadius: 12, border: '1px solid #fca5a5', background: 'white', color: '#b91c1c', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>Reject</button>
-            <button disabled={busy} onClick={() => decide(true)} style={{ padding: '13px 28px', borderRadius: 12, border: 'none', color: 'white', fontWeight: 800, fontSize: 15, cursor: 'pointer', background: '#15803d', boxShadow: '0 6px 16px rgba(21,128,61,0.3)' }}>Approve &amp; submit</button>
+            <button disabled={busy || !!blocked} onClick={() => decide(false)} style={{ padding: '13px 24px', borderRadius: 12, border: '1px solid #fca5a5', background: 'white', color: '#b91c1c', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>Reject</button>
+            <button disabled={busy || !!blocked} onClick={() => decide(true)} style={{ padding: '13px 28px', borderRadius: 12, border: 'none', color: 'white', fontWeight: 800, fontSize: 15, cursor: 'pointer', background: '#15803d', boxShadow: '0 6px 16px rgba(21,128,61,0.3)' }}>Approve &amp; submit</button>
           </div>
         </div>
       </div>

@@ -33,3 +33,6 @@ medbridge_demo.gif
 
 # provisional evaluation outputs (add once the runs are complete)
 backend/eval/results/
+
+# written by a pytest plugin on every test run
+backend/results.json
