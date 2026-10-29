@@ -74,7 +74,7 @@ export default function App() {
         const data = await res.json();
         setWorkflowData(data);
         if (TERMINAL.has(data.status)) { stopPolling(); setView('result'); }
-      } catch {}
+      } catch { /* a missed poll is retried 1.5 s later */ }
     }, 1500);
   };
 

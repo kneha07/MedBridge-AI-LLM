@@ -1,16 +1,32 @@
-# React + Vite
+# MedBridge frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 19 + Vite. Talks to the FastAPI backend (see the [main README](../README.md)); the API address is the `API` constant in `src/api.js` (`http://localhost:8000`).
 
-Currently, two official plugins are available:
+```bash
+npm install
+npm run dev      # http://localhost:5173 (the backend must be running on port 8000)
+npm run build    # production build into dist/
+npm run lint     # ESLint
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Layout
 
-## React Compiler
+| File | What it is |
+|---|---|
+| `src/App.jsx` | Top-level state: sign-in, the tab bar, which screen is showing, polling of a running request |
+| `src/api.js` | `apiFetch`, which adds the bearer token; the session lives in `sessionStorage` |
+| `components/SignIn.jsx` | Sign-in and create-account page (`/#create` opens the sign-up form) |
+| `components/Landing.jsx` | Home page with the animated workflow preview |
+| `components/WorkflowForm.jsx` | New-request form, grouped into four sections, with voice dictation (`MicButton.jsx`, `speech.js`) |
+| `components/ProgressView.jsx` | Progress bar, step timeline, FHIR message viewers, confirmation number |
+| `components/ReviewPanels.jsx` | Review checklist and approval card, audit trail, past-requests list |
+| `components/ChatPanel.jsx`, `CitationDrawer.jsx` | Policy chatbot and the drawer that shows a cited passage |
+| `components/TeamPanel.jsx` | Reviewer-only list of accounts, with promote/demote |
+| `components/DemoHeader.jsx`, `Logo.jsx`, `Icon.jsx` | Header with the signed-in user, logo, line icons |
+| `src/index.css` | Global styles, the page backdrop, and the CSS for the landing page, sign-in, tab bar and form |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Notes
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- There are no frontend tests. The backend has unit tests; the screens were checked by running the app and taking screenshots at desktop and 390 px widths.
+- `AgentProgress.jsx`, `VerticalSelector.jsx`, `AuthForm.jsx` and `ResultCard.jsx` are not used by the app. They are left over from the hackathon version and can be deleted. All five remaining ESLint errors are in the first two of them.
+- Starting a new request only resets the screen. It does not delete saved requests (an earlier version did).

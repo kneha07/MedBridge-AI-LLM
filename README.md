@@ -126,13 +126,13 @@ With the payer filter, sizes from 80 to 320 words all reach Recall@5 of 1.00 and
 ## Architecture
 
 ```
-React (Vite) ── chat · request form · review screen · history
-      │ HTTP (+1.5 s polling)
-FastAPI ── /api/chat · /api/workflow/* · SQLite (requests, steps, audit)
+React (Vite) ── sign-in · chat · request form · review screen · history · team
+      │ HTTP (+1.5 s polling, bearer token)
+FastAPI ── /api/auth/* · /api/users/* · /api/chat · /api/workflow/* · SQLite (requests, steps, audit, accounts)
       │
 Agent runner ── LLM → tool call → observe → repeat
       │            (pauses at approval-required tools)
-      ├── Healthcare vertical: 6 tools (patient records from the MIMIC-IV demo; payer responses simulated)
+      ├── Healthcare vertical: 6 tools (patient records from the MIMIC-IV demo; payer responses and a FHIR-shaped Claim/ClaimResponse simulated)
       └── RAG: ChromaDB + all-MiniLM-L6-v2 embeddings → cited policy passages
 LLM provider (AI_PROVIDER): Groq (default openai/gpt-oss-120b) | Claude (Anthropic API) | Claude on Amazon Bedrock
 ```
@@ -160,7 +160,7 @@ pip install pymupdf                  # only needed to rebuild the corpus
 python -m rag.build_corpus           # required: downloads the public policy documents (they are not committed)
 python -m rag.store                  # build the vector index
 python -m mimic_loader               # download + load the open MIMIC-IV demo patients (demo form uses patient 10021312)
-uvicorn main:app --port 8000
+python -m uvicorn main:app --port 8000   # `python -m` makes sure the venv's packages are used
 
 # 3. Frontend
 cd frontend
@@ -168,7 +168,24 @@ npm install
 npm run dev                          # http://localhost:5173
 ```
 
+Sign-in is on by default. Open http://localhost:5173 and use a demo account (`alice` / `2468` is a reviewer, `bob` / `1357` is staff), or create your own account. Set `MEDBRIDGE_AUTH=off` in `.env` to turn sign-in off.
+
 The Docker files are from the hackathon version and have not been updated.
+
+### Tests and evaluations
+
+```bash
+cd backend
+python -m pytest tests                                   # 23 unit tests: FHIR mock, sign-in, roles, accounts (no LLM calls)
+python -m eval.retrieval_eval                            # retrieval: Recall@k and MRR over 34 queries
+python -m eval.ablation_eval                             # chunk-size and overlap ablation
+python -m eval.agent_eval --provider bedrock --runs 5    # agent tool sequence (needs provider credentials)
+python -m eval.chat_eval --provider bedrock --mode both  # chatbot, 36 questions, with vs without retrieval
+python -m eval.chat_eval --provider bedrock --mode static  # ablation: hard-coded table instead of retrieval
+python -m eval.chat_eval --questions chat_questions_heldout.json --provider bedrock --mode rag   # also: _set3, _set4
+```
+
+The chat questions are in four files in `backend/eval/` (36, 20, 15 and 14 questions). They were written by an AI assistant from the policy documents and spot-checked, scoring is deliberately coarse, and each file was committed before it was run, so treat the numbers as a sanity check and not a benchmark.
 
 ---
 
@@ -176,6 +193,11 @@ The Docker files are from the hackathon version and have not been updated.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
+| `GET` | `/api/auth/config` | Whether sign-in is on, the roles, and the public demo accounts. |
+| `POST` | `/api/auth/login` | Body: `{"username": "...", "password": "..."}` (the PIN for demo accounts). Returns a bearer token. |
+| `POST` | `/api/auth/register` | Body: `{"full_name", "email", "organization", "password"}`. Creates a staff account and returns a token. |
+| `GET` | `/api/users` | Reviewers only. The team and their roles. |
+| `POST` | `/api/users/{name}/role` | Reviewers only. Body: `{"role": "reviewer" or "staff"}`. |
 | `POST` | `/api/chat` | Policy chatbot. Body: `{"messages":[{"role":"user","content":"..."}]}`. Returns reply, citations, tools used. |
 | `POST` | `/api/workflow/submit` | Start a prior-auth request. |
 | `GET` | `/api/workflow/{id}/status` | Status, steps and audit trail. Status `awaiting_approval` means the agent is paused. |
@@ -184,6 +206,8 @@ The Docker files are from the hackathon version and have not been updated.
 | `POST` | `/api/demo/reset` | Clear all saved requests (reviewers only when sign-in is on). The app's buttons no longer call it; use it deliberately, for example with `curl`. |
 | `GET` | `/health` | Health check. |
 
+With sign-in on, the chat, workflow, history, team and reset endpoints need the header `Authorization: Bearer <token>`. `/health`, `/api/auth/*` and `/api/verticals` (the form definition) are public.
+
 ---
 
 ## Limitations
@@ -191,6 +215,7 @@ The Docker files are from the hackathon version and have not been updated.
 - Payer submission and payer decisions are simulated. Patient data is only the 100-patient open MIMIC-IV demo: hospital admissions, no outpatient notes, so conservative-therapy duration cannot be confirmed from a record. The policy-scan tool reports only retrieved passages (no hard-coded coverage rules); the payer portal and submission method are simulated.
 - Small policy corpus (12 documents; Aetna, Medicare, two Blue Cross Blue Shield plans, UnitedHealthcare and Cigna site-of-care only, plus one benefits-manager guideline; no Humana or Medicaid, and no payer-specific lumbar-MRI criteria for UnitedHealthcare or Cigna).
 - Sign-in is a prototype control, not production authentication: the demo PINs are public, there is no email verification or password reset, tokens last 8 hours and can only be invalidated by removing or changing the account, and anyone who can reach the server can create a staff account. With `MEDBRIDGE_AUTH=off` the reviewer name is free text.
+- The chatbot sometimes misses an answer that is in the corpus: it writes its own search query, and answers inside long policies (the Blue Cross Blue Shield of South Carolina one in particular) can rank below passages of shorter, more general documents. Evaluation sets are small and hand-written (see above).
 - Not HIPAA-compliant. Do not enter real patient data, and do not send it to a free-tier LLM API.
 - Generated appeals and answers are informational and need clinician review.
 
