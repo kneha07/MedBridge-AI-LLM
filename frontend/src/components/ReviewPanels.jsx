@@ -132,8 +132,8 @@ export function ApprovalCard({ workflow, onDecide, user }) {
           </div>
           {(blocked || error) && <div role="alert" style={{ color: '#92400e', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, padding: '10px 14px', fontSize: 14.5, fontWeight: 600 }}>{blocked || error}</div>}
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-            <button disabled={busy || !!blocked} onClick={() => decide(false)} style={{ padding: '13px 24px', borderRadius: 12, border: '1px solid #fca5a5', background: 'white', color: '#b91c1c', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>Reject</button>
-            <button disabled={busy || !!blocked} onClick={() => decide(true)} style={{ padding: '13px 28px', borderRadius: 12, border: 'none', color: 'white', fontWeight: 800, fontSize: 15, cursor: 'pointer', background: '#15803d', boxShadow: '0 6px 16px rgba(21,128,61,0.3)' }}>Approve &amp; submit</button>
+            <button disabled={busy || !!blocked} className="decide-btn" onClick={() => decide(false)} style={{ padding: '13px 24px', borderRadius: 12, border: '1px solid #fca5a5', background: 'white', color: '#b91c1c', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>Reject</button>
+            <button disabled={busy || !!blocked} className="decide-btn" onClick={() => decide(true)} style={{ padding: '13px 28px', borderRadius: 12, border: 'none', color: 'white', fontWeight: 800, fontSize: 15, cursor: 'pointer', background: '#15803d', boxShadow: '0 6px 16px rgba(21,128,61,0.3)' }}>Approve &amp; submit</button>
           </div>
         </div>
       </div>
@@ -173,25 +173,42 @@ const STATUS_STYLE = {
   rejected: ['#991b1b', '#fee2e2', 'Rejected'], needs_info: ['#991b1b', '#fee2e2', 'Failed'], denied: ['#991b1b', '#fee2e2', 'Denied'], approved: ['#166534', '#dcfce7', 'Approved'],
 };
 
+function ago(iso) {
+  const t = new Date(iso + 'Z'); const sec = Math.round((Date.now() - t) / 1000);
+  if (sec < 60) return 'Just now';
+  if (sec < 3600) return `${Math.floor(sec / 60)} min ago`;
+  if (sec < 86400) return `${Math.floor(sec / 3600)} h ago`;
+  if (sec < 172800) return 'Yesterday';
+  return t.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
 export function HistoryPanel({ items, onOpen }) {
   return (
     <div style={{ maxWidth: 860, margin: '0 auto', padding: '28px 24px' }}>
-      <h2 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: 26, fontWeight: 900, letterSpacing: '-0.5px', color: '#18181b', margin: '0 0 6px' }}>Past requests</h2>
-      <p style={{ color: '#71717a', fontSize: 14, margin: '0 0 20px' }}>Saved on the server, so requests survive a refresh or restart.</p>
+      <h2 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: 30, fontWeight: 800, letterSpacing: '-0.8px', color: '#18181b', margin: '0 0 6px' }}>Past requests</h2>
+      <p style={{ color: '#71717a', fontSize: 14.5, margin: '0 0 22px' }}>{items.length ? `${items.length} saved on the server, so they survive a refresh or restart.` : 'Saved on the server, so requests survive a refresh or restart.'}</p>
       {items.length === 0 && (
-        <div style={{ ...panel, padding: 40, textAlign: 'center', color: '#71717a' }}>No requests yet. Start one from the Prior Auth Agent tab.</div>
+        <div style={{ ...panel, padding: '48px 24px', textAlign: 'center', color: '#52525b', display: 'grid', justifyItems: 'center', gap: 12 }}>
+          <span className="hist-icon" style={{ width: 52, height: 52 }}><Icon name="clipboard" size={24} /></span>
+          <strong style={{ color: '#18181b', fontSize: 17 }}>No requests yet</strong>
+          <span style={{ fontSize: 14.5 }}>Start one from the New request tab and it will show up here.</span>
+        </div>
       )}
-      <div style={{ display: 'grid', gap: 10 }}>
+      <div style={{ display: 'grid', gap: 12 }}>
         {items.map((h, i) => {
           const [fg, bg, label] = STATUS_STYLE[h.status] || STATUS_STYLE.pending;
           return (
-            <button key={h.workflow_id} onClick={() => onOpen(h.workflow_id)} className="fade-up" style={{ ...panel, animationDelay: `${i * 40}ms`, display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px', cursor: 'pointer', textAlign: 'left', width: '100%' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, color: '#18181b', fontSize: 15 }}>{h.summary}</div>
-                <div style={{ color: '#71717a', fontSize: 13, marginTop: 2 }}>{[h.insurance, h.treatment].filter(Boolean).join(' · ')}</div>
-              </div>
-              <div style={{ color: '#71717a', fontSize: 12.5 }}>{new Date(h.created_at + 'Z').toLocaleString()}</div>
-              <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 0.6, textTransform: 'uppercase', padding: '4px 11px', borderRadius: 100, color: fg, background: bg }}>{label}</span>
+            <button key={h.workflow_id} onClick={() => onOpen(h.workflow_id)} className="fade-up hist-card" style={{ animationDelay: `${i * 40}ms` }}>
+              <span className="hist-icon"><Icon name="clipboard" size={20} /></span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ display: 'block', fontWeight: 700, color: '#18181b', fontSize: 15.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{h.summary}</span>
+                <span style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 6 }}>
+                  {[h.insurance, h.treatment].filter(Boolean).map(t => <span key={t} className="hist-chip">{t}</span>)}
+                  <span style={{ color: '#71717a', fontSize: 12.5, alignSelf: 'center' }} title={new Date(h.created_at + 'Z').toLocaleString()}>{ago(h.created_at)}</span>
+                </span>
+              </span>
+              <span className="hist-status" style={{ color: fg, background: bg }}><i style={{ background: fg }} />{label}</span>
+              <span className="hist-chevron" aria-hidden="true"><Icon name="arrow-right" size={17} /></span>
             </button>
           );
         })}

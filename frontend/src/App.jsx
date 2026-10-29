@@ -136,14 +136,7 @@ export default function App() {
   return (
     <div style={{ minHeight: '100vh' }}>
       <a href="#main" className="skip-link">Skip to main content</a>
-      <DemoHeader onHome={() => setMode('home')} onReset={mode === 'workflow' && view !== 'select' ? handleReset : null} vertical={mode === 'workflow' ? vertical : null} />
-
-      {authOn && user && (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, padding: '10px 20px 0', fontSize: 13.5, color: '#52525b' }}>
-          <span>Signed in as <strong style={{ color: '#18181b' }}>{user.display || user.name}</strong> ({user.role})</span>
-          <button onClick={signOut} style={{ border: '1px solid #d4d4d8', background: 'white', borderRadius: 999, padding: '5px 14px', fontWeight: 600, cursor: 'pointer' }}>Sign out</button>
-        </div>
-      )}
+      <DemoHeader user={authOn ? user : null} onSignOut={signOut} onHome={() => setMode('home')} onReset={mode === 'workflow' && view !== 'select' ? handleReset : null} vertical={mode === 'workflow' ? vertical : null} />
 
       <nav style={{ display: 'flex', justifyContent: 'center', padding: '16px 12px 0' }} aria-label="Main">
         <div style={{ display: 'inline-flex', gap: 4, padding: 4, background: 'white', border: '1px solid #e7e5e4', borderRadius: 14, boxShadow: '0 2px 8px rgba(15,23,42,0.05)' }}>

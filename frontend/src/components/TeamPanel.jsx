@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../api';
+import Icon from './Icon';
 
 // Reviewer-only: see who has an account and promote or demote people who signed up.
 export default function TeamPanel({ me }) {
@@ -24,47 +25,37 @@ export default function TeamPanel({ me }) {
     setBusy('');
   };
 
-  const cell = { padding: '12px 16px', borderBottom: '1px solid #f5f5f4', fontSize: 15 };
+  const reviewers = users ? users.filter(u => u.role === 'reviewer').length : 0;
   return (
-    <section style={{ maxWidth: 760, margin: '28px auto', padding: '0 16px' }}>
-      <div style={{ background: 'white', border: '1px solid #e7e5e4', borderRadius: 20, boxShadow: '0 8px 32px rgba(15,23,42,0.08)', overflow: 'hidden' }}>
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid #e7e5e4' }}>
-          <h2 style={{ margin: 0, fontFamily: '"Source Serif 4", serif', fontSize: 24 }}>Team</h2>
-          <p style={{ margin: '6px 0 0', color: '#52525b', fontSize: 14.5 }}>
-            New sign-ups start as staff. Make someone a reviewer so they can approve requests. You cannot change your own role.
-          </p>
-        </div>
-        {error && <div role="alert" style={{ margin: '12px 24px 0', color: '#b91c1c', fontWeight: 600, fontSize: 14.5 }}>{error}</div>}
-        {!users ? <div style={{ ...cell, color: '#71717a' }}>Loading…</div> : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead><tr style={{ textAlign: 'left', color: '#71717a', fontSize: 13 }}>
-              <th style={cell}>Name</th><th style={cell}>Role</th><th style={cell}>Account</th><th style={cell}><span className="sr-only">Action</span></th>
-            </tr></thead>
-            <tbody>
-              {users.map(u => {
-                const fixed = u.source !== 'signed up' || u.name === me.name;
-                return (
-                  <tr key={u.name}>
-                    <td style={cell}>
-                      <div style={{ fontWeight: 700 }}>{u.display || u.name}{u.name === me.name ? ' (you)' : ''}</div>
-                      {(u.display && u.display !== u.name) && <div style={{ fontSize: 13, color: '#71717a' }}>{u.name}{u.organization ? ` · ${u.organization}` : ''}</div>}
-                    </td>
-                    <td style={cell}>{u.role}</td>
-                    <td style={{ ...cell, color: '#71717a' }}>{u.source === 'signed up' ? 'Signed up' : 'Demo / server config'}</td>
-                    <td style={{ ...cell, textAlign: 'right' }}>
-                      {!fixed && (
-                        <button disabled={busy === u.name} onClick={() => change(u.name, u.role === 'reviewer' ? 'staff' : 'reviewer')}
-                          style={{ border: '1px solid #d4d4d8', background: 'white', borderRadius: 999, padding: '6px 14px', fontWeight: 700, cursor: 'pointer' }}>
-                          {u.role === 'reviewer' ? 'Make staff' : 'Make reviewer'}
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
+    <section style={{ maxWidth: 760, margin: '0 auto', padding: '28px 24px' }}>
+      <h2 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: 30, fontWeight: 800, letterSpacing: '-0.8px', color: '#18181b', margin: '0 0 6px' }}>Team</h2>
+      <p style={{ color: '#71717a', fontSize: 14.5, margin: '0 0 22px' }}>
+        {users ? `${users.length} ${users.length === 1 ? 'person' : 'people'}, ${reviewers} can approve requests.` : 'Loading…'} New sign-ups start as staff.
+      </p>
+      {error && <div role="alert" className="auth-msg error" style={{ marginBottom: 14 }}><Icon name="alert" size={17} />{error}</div>}
+      <div style={{ display: 'grid', gap: 10 }}>
+        {(users || []).map(u => {
+          const isMe = u.name === me.name;
+          const fixed = u.source !== 'signed up' || isMe;
+          const shown = u.display || u.name;
+          return (
+            <div key={u.name} className="team-row">
+              <span className={`user-avatar lg ${u.role}`} aria-hidden="true">{shown[0].toUpperCase()}</span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ display: 'block', fontWeight: 700, color: '#18181b', fontSize: 15.5 }}>{shown}{isMe && <span className="team-you">You</span>}</span>
+                <span style={{ display: 'block', fontSize: 13, color: '#71717a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {[u.display && u.display !== u.name ? u.name : null, u.organization, u.source === 'signed up' ? null : 'Demo account'].filter(Boolean).join(' · ') || ' '}
+                </span>
+              </span>
+              <span className={`role-pill ${u.role}`}>{u.role}</span>
+              {fixed ? <span style={{ width: 118 }} aria-hidden="true" /> : (
+                <button className="team-action" disabled={busy === u.name} onClick={() => change(u.name, u.role === 'reviewer' ? 'staff' : 'reviewer')}>
+                  {u.role === 'reviewer' ? 'Make staff' : 'Make reviewer'}
+                </button>
+              )}
+            </div>
+          );
+        })}
       </div>
     </section>
   );

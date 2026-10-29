@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Logo from './Logo';
 import Icon from './Icon';
 
-export default function DemoHeader({ onReset, onHome, vertical }) {
+export default function DemoHeader({ onReset, onHome, vertical, user, onSignOut }) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -87,6 +87,19 @@ export default function DemoHeader({ onReset, onHome, vertical }) {
             LIVE DEMO
           </span>
         </div>
+
+        {user && (
+          <div className="user-chip">
+            <span className={`user-avatar ${user.role}`} aria-hidden="true">{(user.display || user.name)[0].toUpperCase()}</span>
+            <span className="user-meta">
+              <span className="user-name">{user.display || user.name}</span>
+              <span className="user-role">{user.role}</span>
+            </span>
+            <button type="button" className="user-signout" onClick={onSignOut} aria-label={`Sign out ${user.display || user.name}`} title="Sign out">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="m16 17 5-5-5-5M21 12H9" /></svg>
+            </button>
+          </div>
+        )}
 
         {onReset && (
           <button

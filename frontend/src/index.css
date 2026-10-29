@@ -321,3 +321,39 @@ label:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
   .auth-step { animation: none; opacity: 1; }
   .auth-submit, .auth-submit::after, .auth-chip { transition: none; }
 }
+
+/* ── Header user chip ── */
+.user-chip { display: flex; align-items: center; gap: 10px; padding: 4px 6px 4px 4px; border-radius: 999px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.13); }
+.user-avatar { width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0; background: #e7e5e4; color: #3f3f46; }
+.user-avatar.reviewer { background: linear-gradient(135deg, #99f6e4, #2dd4bf); color: #0f4f49; }
+.user-avatar.lg { width: 44px; height: 44px; font-size: 17px; }
+.user-meta { display: grid; line-height: 1.15; }
+.user-name { font-size: 13px; font-weight: 700; color: white; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-role { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,0.6); }
+.user-signout { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; border: none; background: transparent; color: rgba(255,255,255,0.7); cursor: pointer; transition: background .15s, color .15s; }
+.user-signout:hover { background: rgba(255,255,255,0.14); color: white; }
+@media (max-width: 720px) { .user-meta { display: none; } }
+
+/* ── Review buttons that cannot be used right now ── */
+.decide-btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none !important; filter: grayscale(.35); }
+
+/* ── Past requests ── */
+.hist-card { display: flex; align-items: center; gap: 16px; width: 100%; padding: 16px 20px; text-align: left; cursor: pointer; background: rgba(255,255,255,0.86); backdrop-filter: blur(10px); border: 1px solid #e7e5e4; border-radius: 18px; box-shadow: 0 2px 10px rgba(15,23,42,0.05); transition: transform .18s, box-shadow .18s, border-color .18s; }
+.hist-card:hover { transform: translateY(-2px); border-color: #99f6e4; box-shadow: 0 14px 30px -12px rgba(13,148,136,0.28); }
+.hist-card:hover .hist-chevron { transform: translateX(3px); color: #0f766e; }
+.hist-icon { width: 42px; height: 42px; border-radius: 50%; background: #ccfbf1; color: #0f766e; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.hist-chip { font-size: 12px; font-weight: 600; color: #3f3f46; background: #f4f4f5; padding: 3px 10px; border-radius: 999px; }
+.hist-status { display: inline-flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; padding: 5px 12px; border-radius: 999px; flex-shrink: 0; }
+.hist-status i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.hist-chevron { color: #a1a1aa; transition: transform .18s, color .18s; display: inline-flex; }
+@media (max-width: 560px) { .hist-card { flex-wrap: wrap; } .hist-chevron { display: none; } }
+
+/* ── Team ── */
+.team-row { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: rgba(255,255,255,0.86); backdrop-filter: blur(10px); border: 1px solid #e7e5e4; border-radius: 18px; box-shadow: 0 2px 10px rgba(15,23,42,0.05); }
+.team-you { margin-left: 8px; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #0f766e; background: #ccfbf1; padding: 2px 8px; border-radius: 999px; vertical-align: 2px; }
+.role-pill { font-size: 11.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 5px 12px; border-radius: 999px; background: #f4f4f5; color: #52525b; }
+.role-pill.reviewer { background: #ccfbf1; color: #0f766e; }
+.team-action { width: 118px; border: 1px solid #d4d4d8; background: white; border-radius: 999px; padding: 7px 0; font-size: 13px; font-weight: 700; color: #27272a; cursor: pointer; transition: border-color .15s, background .15s; }
+.team-action:hover:not(:disabled) { border-color: #5eead4; background: #f0fdfa; }
+.team-action:disabled { opacity: .6; cursor: default; }
+@media (max-width: 560px) { .team-row { flex-wrap: wrap; } }
