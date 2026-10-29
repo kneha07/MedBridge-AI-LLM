@@ -80,7 +80,17 @@ The questions were written by the author after reading the documents and the cor
 
 The hard-coded table (the `policy_data.py` dictionary the project started with) is the "agent without RAG" ablation: it cannot answer detail questions such as exact week counts, BMI thresholds or the Medicare pacemaker conditions. Its 6/6 on unanswerable questions mostly reflects that it has little content to answer from, not better judgement.
 
-Retrieval misses (3 answerable, 1 unanswerable): `uhc-sign` (the model said the passages list no per-service documentation requirements); `bcbs-4wk` and `bcbsla-redflag`; and `na-cpt`, a CPT-coding request the model declined as out of scope rather than as "not in the documents". The first 30 questions scored 23/24 with retrieval before two documents were added. After adding the Blue Cross Blue Shield of Louisiana and HealthHelp lumbar policies, `bcbs-4wk` started to fail because a second, similar Blue Cross lumbar policy competes for the top-k results and the South Carolina passage with the duration rule was not returned, and `bcbsla-redflag` listed the red flags correctly up to the point where the retrieved chunk was cut off, before "saddle anesthesia". Adding similar documents can therefore hurt retrieval; I did not tune around this. The scorer ignores markdown bold so that "does **not** include" counts as a refusal. Groq results in the same folder are partial (rate-limit errors on the retrieval run) and use the earlier 30 questions.
+Retrieval misses (3 answerable, 1 unanswerable): `uhc-sign` (the model said the passages list no per-service documentation requirements); `bcbs-4wk` and `bcbsla-redflag`; and `na-cpt`, a CPT-coding request the model declined as out of scope rather than as "not in the documents". The first 30 questions scored 23/24 with retrieval before two documents were added. After adding the Blue Cross Blue Shield of Louisiana and HealthHelp lumbar policies, `bcbs-4wk` started to fail because a second, similar Blue Cross lumbar policy competes for the top-k results and the South Carolina passage with the duration rule was not returned, and `bcbsla-redflag` listed the red flags correctly up to the point where the retrieved chunk was cut off, before "saddle anesthesia". Adding similar documents can therefore hurt retrieval. The scorer ignores markdown bold so that "does **not** include" counts as a refusal. Groq results in the same folder are partial (rate-limit errors on the retrieval run) and use the earlier 30 questions.
+
+**Passages per search (`CHAT_TOP_K`)**, Claude Sonnet 4.6 on Bedrock, 36 questions, retrieval mode:
+
+| Passages returned | Runs | Answerable correct | Cited a right source | Unanswerable handled |
+|---|---|---|---|---|
+| 4 (the earlier default) | 2 | 27/30, 27/30 | 30/30 | 5/6, 4/6 |
+| **6 (the default now)** | 2 | 29/30, 29/30 | 30/30 | 5/6, 4/6 |
+| 8 | 1 | 28/30 | 27/30 | 5/6 |
+
+At 4 passages both runs missed `bcbs-4wk` and `bcbsla-redflag` (the two regressions above); at 6 both runs fixed them; at 8 one run lost a different question and cited a right source less often. The "unanswerable" column changes between runs of the same setting (which question is missed varies), so with only 6 such questions treat it as noise. **Caveat:** I chose 6 after seeing these same questions fail, so the improvement from 4 to 6 is partly fitted to this question set and may be smaller on new questions; a fresh set of questions would be needed to confirm it.
 
 **Chunk-size ablation** (`python -m eval.ablation_eval`, same 34 queries, payer filter on / off; results in `eval/results/retrieval_ablation.json`):
 

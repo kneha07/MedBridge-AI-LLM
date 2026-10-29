@@ -10,6 +10,7 @@ from agent_runner import get_groq
 from rag import store
 
 MAX_TOOL_ROUNDS = 4
+TOP_K = int(os.environ.get("CHAT_TOP_K", "6"))  # passages returned per search_policy call (4 to 8 compared in the README)
 
 SYSTEM_PROMPT = """You are MedBridge Assistant, a prior-authorization policy assistant for clinic staff.
 Rules:
@@ -33,7 +34,7 @@ TOOLS = [
 
 def _run_tool(name: str, args: dict, citations: dict) -> dict:
     if name == "search_policy":
-        hits = store.search(args.get("query", ""), k=4, payer=args.get("payer") or None)
+        hits = store.search(args.get("query", ""), k=TOP_K, payer=args.get("payer") or None)
         for h in hits:
             citations.setdefault(h["title"], {"title": h["title"], "url": h["source"],
                                               "synthetic": h["synthetic"], "score": h["score"],
