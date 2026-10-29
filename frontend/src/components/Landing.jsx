@@ -148,7 +148,7 @@ const S = {
   statSrc: { display: 'inline-block', fontSize: 12, fontWeight: 700, letterSpacing: 0.4, color: '#52525b', background: '#f5f5f4', borderRadius: 100, padding: '3px 10px' },
   trustGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,440px),1fr))', gap: 18 },
   badge: { width: 46, height: 46, borderRadius: '50%', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: '#ccfbf1', color: '#0f766e' },
-  demo: { borderRadius: 22, background: 'rgba(255,255,255,0.97)', border: '1px solid rgba(255,255,255,0.6)',
+  demo: { borderRadius: 22, background: 'rgba(255,255,255,0.92)', border: '1px solid #e7e5e4', backdropFilter: 'blur(18px)',
     boxShadow: '0 30px 80px rgba(24,24,27,0.12), 0 2px 6px rgba(24,24,27,0.04)', overflow: 'hidden' },
   demoBar: { display: 'flex', alignItems: 'center', gap: 6, padding: '13px 18px', borderBottom: '1px solid #f0eeec', background: '#fafaf9' },
   dot: { width: 10, height: 10, borderRadius: '50%', display: 'inline-block' },
