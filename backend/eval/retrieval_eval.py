@@ -36,6 +36,12 @@ QUERIES = [  # (payer, query, relevant title substring)
     ("Blue Cross Blue Shield", "lumbar spine MRI neurological deficit muscle weakness criteria", "CAM 709"),
     ("Blue Cross Blue Shield", "indications for lumbar MRI cauda equina suspected infection", "CAM 709"),
     ("Blue Cross Blue Shield", "when is repeat lumbar MRI after spine surgery necessary", "CAM 709"),
+    # Blue Cross Blue Shield of Louisiana (Medicare Advantage) and HealthHelp (radiology benefits manager)
+    ("Blue Cross Blue Shield", "red flag conditions that justify lumbar MRI saddle anesthesia fever history of cancer", "MNG-018"),
+    ("Blue Cross Blue Shield", "lumbar MRI after one month of symptoms and failed home exercise physical therapy anti-inflammatory", "MNG-018"),
+    ("HealthHelp", "lumbar MRI active conservative management at least 6 weeks within last 6 months symptoms persist", "HealthHelp"),
+    ("HealthHelp", "lumbar radiculopathy demonstrated on nerve conduction study or EMG", "HealthHelp"),
+    ("HealthHelp", "cauda equina syndrome suspected lumbar MRI bowel bladder dysfunction", "HealthHelp"),
     # UnitedHealthcare (site-of-service and Medicare Advantage radiology rules; no lumbar criteria in these)
     ("United Healthcare", "when is an MRI in the hospital outpatient department medically necessary instead of a freestanding facility", "MP.13.20"),
     ("United Healthcare", "MRI requires sedation or general anesthesia not available at freestanding imaging center", "MP.13.20"),

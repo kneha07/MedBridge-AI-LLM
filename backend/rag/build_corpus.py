@@ -46,6 +46,16 @@ SOURCES = [
     ("bcbssc_cam_709_lumbar_mri", "Blue Cross Blue Shield", "Blue Cross Blue Shield of South Carolina CAM 709 - MRI Lumbar Spine",
      "https://www.southcarolinablues.com/web/public/brands/medicalpolicy/external/external-policies/mri-lumbar-spine",
      "html", "MRI Lumbar Spine - CAM 709", ("\nReferences",)),
+    ("bcbsla_mng_018_lumbar_mri_medicare_advantage", "Blue Cross Blue Shield",
+     "Blue Cross Blue Shield of Louisiana MNG-018 - MRI Lumbar Spine (Medicare Advantage)",
+     "https://providers.bcbsla.com/-/media/Files/Providers/Blue%20Advantage%20Resources/2024-06%20MRI%20Lumbar%20Spine%20MNG-018%20pdf.pdf",
+     "pdf", "Coverage Criteria", ("References:", "Policy History")),
+    # HealthHelp (WNS) is a radiology benefits manager that writes guidelines for health plans; it is not a payer,
+    # so it is indexed under its own name and never answers for a named payer.
+    ("healthhelp_mri_lumbar_spine", "HealthHelp",
+     "HealthHelp (WNS) MRI Lumbar Spine Guideline MRI-LSpine-HH (radiology benefits manager)",
+     "https://www.healthhelp.com/wp-content/uploads/MRI-LSpine-HH_20251107.pdf",
+     "pdf", "\nMRI Lumbar Spine Overview\n", ("\nCombination CT and MRI for Metastases Evaluation Guideline\n",)),
 ]
 
 

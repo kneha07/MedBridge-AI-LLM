@@ -336,5 +336,78 @@
   "answerable": false,
   "must_match": [],
   "expected_sources": []
+ },
+ {
+  "id": "bcbsla-month",
+  "payer": "Blue Cross Blue Shield",
+  "question": "Under Blue Cross Blue Shield of Louisiana's Medicare Advantage lumbar MRI policy, how long should symptoms last, with failed conservative treatment, before a lumbar MRI without red flags may be appropriate?",
+  "answerable": true,
+  "must_match": [
+   "1 month|one month|four weeks|4 weeks"
+  ],
+  "expected_sources": [
+   "MNG-018"
+  ]
+ },
+ {
+  "id": "bcbsla-redflag",
+  "payer": "Blue Cross Blue Shield",
+  "question": "Which red-flag findings does Blue Cross Blue Shield of Louisiana's lumbar MRI policy (MNG-018) list as reasons to image without waiting?",
+  "answerable": true,
+  "must_match": [
+   "saddle anesthesia",
+   "cancer"
+  ],
+  "expected_sources": [
+   "MNG-018"
+  ]
+ },
+ {
+  "id": "bcbsla-ddd",
+  "payer": "Blue Cross Blue Shield",
+  "question": "When does Blue Cross Blue Shield of Louisiana's Medicare Advantage policy say a lumbar MRI for uncomplicated degenerative disc disease is not medically necessary?",
+  "answerable": true,
+  "must_match": [
+   "surgical|aggressive"
+  ],
+  "expected_sources": [
+   "MNG-018"
+  ]
+ },
+ {
+  "id": "hh-6wk",
+  "payer": "HealthHelp",
+  "question": "What duration of active conservative management does the HealthHelp lumbar spine MRI guideline require for back pain without red flags?",
+  "answerable": true,
+  "must_match": [
+   "6[\\s-]*weeks?|six[\\s-]*weeks?"
+  ],
+  "expected_sources": [
+   "HealthHelp"
+  ]
+ },
+ {
+  "id": "hh-emg",
+  "payer": "HealthHelp",
+  "question": "According to the HealthHelp lumbar spine MRI guideline, what test can demonstrate radiculopathy to support an MRI?",
+  "answerable": true,
+  "must_match": [
+   "nerve conduction|EMG|electromyography"
+  ],
+  "expected_sources": [
+   "HealthHelp"
+  ]
+ },
+ {
+  "id": "hh-compression",
+  "payer": "HealthHelp",
+  "question": "In the HealthHelp lumbar MRI guideline, when is a follow-up MRI appropriate after a non-diagnostic MRI for a compression fracture in a patient with known cancer?",
+  "answerable": true,
+  "must_match": [
+   "6 to 8 weeks|6-8 weeks"
+  ],
+  "expected_sources": [
+   "HealthHelp"
+  ]
  }
 ]

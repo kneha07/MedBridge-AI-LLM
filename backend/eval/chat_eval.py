@@ -4,6 +4,7 @@ Run from backend/:
   python -m eval.chat_eval --check-key                      # verify every answer key against the source documents
   python -m eval.chat_eval --provider groq --mode rag --limit 6
   python -m eval.chat_eval --provider bedrock --mode both   # results are saved to eval/results/
+  python -m eval.chat_eval --provider bedrock --mode static # ablation: hard-coded policy table instead of retrieval
 
 Scoring is automatic and deliberately coarse:
   * answerable question: correct if every `must_match` pattern appears in the reply; cited if a returned
@@ -72,13 +73,32 @@ def ask_baseline(question: str, provider: str) -> str:
     return r.choices[0].message.content or ""
 
 
+STATIC_SYSTEM = ("You are a prior-authorization assistant for clinic staff. Answer ONLY from the policy table below. "
+                 "If the table does not contain the answer, say the policy table does not contain it. Answer concisely.\n\n")
+
+
+def ask_static(question: str, provider: str) -> str:
+    """Ablation: the model sees the hard-coded policy table (policy_data.py) instead of retrieved documents."""
+    from policy_data import POLICY_DATA
+    system = STATIC_SYSTEM + json.dumps(POLICY_DATA, indent=1)
+    from agent_runner import claude_model, get_anthropic, get_groq
+    if provider in ("bedrock", "claude"):
+        r = get_anthropic(provider).messages.create(model=claude_model(provider), max_tokens=4000, system=system,
+                                                    messages=[{"role": "user", "content": question}])
+        return "".join(b.text for b in r.content if b.type == "text")
+    r = get_groq().chat.completions.create(model=os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b"), max_tokens=1500,
+                                           messages=[{"role": "system", "content": system},
+                                                     {"role": "user", "content": question}])
+    return r.choices[0].message.content or ""
+
+
 def norm(text: str) -> str:
     return re.sub(r"[\u2010-\u2015\u2212]", "-", text.replace("\u00a0", " ").replace("\u202f", " "))
 
 
 def score(q: dict, reply: str, citations: list[dict]) -> dict:
     reply = norm(reply)
-    refused = bool(REFUSAL.search(reply))
+    refused = bool(REFUSAL.search(reply.replace("*", "")))
     if not q["answerable"]:
         return {"correct": refused, "cited": None, "refused": refused}
     correct = all(re.search(p, reply, re.I) for p in q["must_match"])
@@ -99,7 +119,8 @@ async def run(provider: str, mode: str, limit: int | None, offset: int, only_ids
                 r = await chat([{"role": "user", "content": q["question"]}], provider=provider)
                 reply, cites, tools = r["reply"], r["citations"], r["tools_used"]
             else:
-                reply, cites, tools = await asyncio.get_event_loop().run_in_executor(None, ask_baseline, q["question"], provider), [], []
+                ask = ask_static if mode == "static" else ask_baseline
+                reply, cites, tools = await asyncio.get_event_loop().run_in_executor(None, ask, q["question"], provider), [], []
             err = None
         except Exception as e:
             reply, cites, tools, err = "", [], [], str(e)[:160]
@@ -123,7 +144,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--check-key", action="store_true")
     ap.add_argument("--provider", default=os.environ.get("AI_PROVIDER", "groq"))
-    ap.add_argument("--mode", choices=["rag", "baseline", "both"], default="both")
+    ap.add_argument("--mode", choices=["rag", "baseline", "static", "both"], default="both")
     ap.add_argument("--limit", type=int)
     ap.add_argument("--offset", type=int, default=0)
     ap.add_argument("--resume", action="store_true", help="re-run only the questions that errored in the saved full run")
