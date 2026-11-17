@@ -2,13 +2,16 @@
 
 Run from backend/:  python -m eval.ablation_eval
 Uses an in-memory index per configuration (the real index in rag/.chroma is not touched) and the
-same hand-written queries as eval.retrieval_eval.
+same hand-written queries as eval.retrieval_eval (document level), plus the 69 answerable chat questions scored at
+passage level (eval.passage_eval: the retrieved chunk must contain the answer; payer filter on). Larger chunks are
+favoured by the passage metric because an answer is less often split across two chunks.
 """
 import json
 
 import chromadb
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 
+from eval import passage_eval
 from eval.retrieval_eval import QUERIES, evaluate
 from rag import store
 
@@ -29,8 +32,11 @@ def main():
             for flag in (True, False):
                 res, _ = evaluate(QUERIES, flag)
                 report[f"chunk={size},overlap={overlap},payer_filter={flag}"] = {"chunks": n, **res}
+            ranks = [passage_eval.rank_of(q, True)[1] for q in passage_eval.load()]
+            report[f"chunk={size},overlap={overlap},passage_level"] = {"chunks": n, **passage_eval.summarize(ranks)}
     finally:
         store.chunk_text, store._collection = real_chunk, real_col
+    (passage_eval.HERE / "results" / "retrieval_ablation.json").write_text(json.dumps(report, indent=1))
     print(json.dumps(report, indent=2))
 
 
