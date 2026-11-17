@@ -1,6 +1,7 @@
 # secrets and local state
 .env
 backend/medbridge.db
+backend/medbridge.db-journal
 backend/data/
 
 # build artifacts

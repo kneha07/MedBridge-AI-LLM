@@ -4,18 +4,20 @@
 
 > 🏆 **1st Place Winner** — AI Agents Hackathon, hosted by OSS4AI in collaboration with Beta Fund and Gravitational Ventures | Solo build. This repository extends that prototype as a course project (INFO 7375, Northeastern).
 
+**Problem.** In 2024, Medicare Advantage insurers fully or partially denied 4.1 million prior-authorization requests. Of the denials that were appealed, 80.7% were overturned in whole or in part, yet only 11.5% were appealed at all ([KFF](https://www.kff.org/medicare/medicare-advantage-insurers-made-nearly-53-million-prior-authorization-determinations-in-2024/)). Each request takes work: reading the payer's policy, finding the evidence in the chart, filling the forms. Physicians report 43 requests a week, about 12 hours of physician and staff time ([AMA](https://www.ama-assn.org/press-center/press-releases/ama-survey-indicates-prior-authorization-wreaks-havoc-patient-care)). MedBridge gives that work to an AI agent that reads the payer's own published policies, checks the patient's record against them, and drafts the request and, after a denial (simulated in this prototype), an appeal. The agent cannot submit anything without a human reviewer, who sees the cited policy passages and, for patients with an outpatient history, a timeline of their therapy against the duration the policy asks for. The order of steps is enforced in code, not only in the prompt. Payers are simulated and patients are synthetic or de-identified; MedBridge prepares the case, and a clinician decides.
+
 MedBridge is an LLM agent for clinic staff. It scans a payer's policy, analyzes the patient's records, completes the authorization form, **pauses for human approval**, then submits and tracks the request. If the payer denies it, the agent drafts an appeal that cites the retrieved policy text. A separate chatbot answers coverage questions from the same policy documents, with sources.
 
 **Model options.** The agent and the chatbot run on **Groq**, **Claude** (Anthropic API) or **Claude on Amazon Bedrock**, chosen with one setting (`AI_PROVIDER`). The evaluations so far were run on Groq; the Claude and Bedrock paths are implemented. The Bedrock path (`us.anthropic.claude-sonnet-4-6`) has only been smoke-tested (one agent run per scenario, three chat questions, no errors), so full results are still to be added.
 
-**Status: research prototype.** Payer submission (EDI 278) and payer decisions are **simulated**; nothing is sent to a real payer. Patient records are read from the open MIMIC-IV demo (100 real, de-identified patients; hospital-admission data only). It must not be used with real patient data.
+**Status: research prototype.** Payer submission (EDI 278) and payer decisions are **simulated**; nothing is sent to a real payer. Patient records come from the open MIMIC-IV demo (100 real, de-identified patients; hospital-admission data only), from Synthea synthetic patients, or from an uploaded FHIR bundle, which is kept in memory for two hours and never saved. It must not be used with real patient data.
 
 ---
 
 ## Why this problem
 
 - In an AMA survey of 1,000 physicians (fielded December 2023, published June 2024), 94% said prior authorization delays necessary care, 24% reported a serious adverse event for a patient, and physicians reported completing an average of 43 requests a week, equal to about 12 hours of physician and staff time ([AMA](https://www.ama-assn.org/press-center/press-releases/ama-survey-indicates-prior-authorization-wreaks-havoc-patient-care); the AMA opposes prior authorization).
-- In 2024 Medicare Advantage insurers fully or partially denied 4.1 million of 52.8 million requests; 80.7% of appealed denials were overturned, but only 11.5% of denials were appealed ([KFF](https://www.kff.org/medicare/medicare-advantage-insurers-made-nearly-53-million-prior-authorization-determinations-in-2024/)).
+- In 2024 Medicare Advantage insurers fully or partially denied 4.1 million of 52.8 million requests; 80.7% of appeals were partially or fully overturned, but only 11.5% of denials were appealed ([KFF](https://www.kff.org/medicare/medicare-advantage-insurers-made-nearly-53-million-prior-authorization-determinations-in-2024/)).
 - Wait times are contested: in an AMA survey (2017 data), about two-thirds of physicians waited at least one business day for a decision and roughly 30% waited three days or longer ([AMA](https://ama-assn.org/survey-patient-clinical-outcomes-shortchanged-prior-authorization)); insurer-reported medians are about one day ([KFF](https://www.kff.org/patient-consumer-protections/prior-authorization-metrics-provide-new-insights-into-insurer-practices-but-gaps-remain/)).
 - CAQH Index 2019: a manual prior authorization cost providers $10.92 versus $1.88 electronically ([summary](https://blog.quadax.com/key-takeaways-from-the-2019-caqh-index)).
 
@@ -37,7 +39,10 @@ MedBridge is an LLM agent for clinic staff. It scans a payer's policy, analyzes 
 | **Human approval gate** | The agent pauses before `submit_authorization`. A reviewer approves or rejects in the UI; rejection stops the request. |
 | **Accounts, roles and sign-in** | Sign-in is on by default. Anyone can **create an account** (full name, work email, optional organization, and a password of at least 8 characters entered twice; the password is stored only as a salted scrypt hash, and people sign in with their email); new accounts are always **staff**. **Staff** prepare requests and use the chat; **reviewers** also approve or reject and can promote or demote signed-up users on the **Team** tab. Two public demo accounts are shown on the sign-in screen: `alice` (reviewer, PIN 2468) and `bob` (staff, PIN 1357). The approver's name comes from the signed token (not from the request body), nobody can approve a request they submitted, and five wrong tries lock a name for five minutes. Set `MEDBRIDGE_AUTH=off` to turn sign-in off or `MEDBRIDGE_USERS` (see `.env.example`) to replace the demo accounts. Tests: `backend/tests/test_auth.py`. |
 | **Policy chatbot** | `POST /api/chat`. Answers only from retrieved passages, cites sources, and says so when the collection doesn't cover a payer. |
-| **Open patient data** | `analyze_medical_records` looks the patient up in the MIMIC-IV demo (SQLite) and reports diagnoses, procedures and analgesic/NSAID medications on record, with its limits. |
+| **Open patient data** | `analyze_medical_records` looks the patient up in the MIMIC-IV demo (SQLite) and reports diagnoses, procedures and analgesic/NSAID medications on record, with its limits. Synthea synthetic patients (optional, `python -m synthea_loader`) add the outpatient back-pain history MIMIC lacks: first back-pain diagnosis, back-pain visits, and weeks of conservative therapy from prescription and physical-therapy dates. |
+| **Upload a patient record** | Drop a FHIR R4 patient bundle (or pick one of three sample patients) on the request form. `fhir_import.py` turns it into the same record the Synthea loader builds, keeps it in server memory for two hours (never in the database), and fills the patient fields and diagnosis code. FHIR prescriptions carry no stop date, so a completed one counts as a single day rather than an invented duration. Checked against Synthea's own FHIR export: on the 89 back-pain patients whose histories agree between the CSV and FHIR runs, diagnoses, visits, therapy sessions, prescription dates and imaging match, and weeks of therapy are never higher than from the CSV. Tests: `backend/tests/test_fhir_import.py`. |
+| **Therapy timeline on the review screen** | For outpatient records, the review screen draws back-pain visits, therapy sessions, prescriptions and imaging on a timeline, with the duration the cited policy passage asks for (e.g. Aetna's "4 weeks of conservative therapy", read from the retrieved text, not hard-coded) and a checklist item comparing the two. |
+| **Tool order enforced in code** | `SequenceGuard` in `agent_runner.py` refuses a tool called before its prerequisites (the model gets an error naming the step to call instead), refuses a second `submit_authorization`, allows `draft_appeal` only after a denial, and nudges the model up to twice if it stops before all steps have run. Each refusal, nudge or unfinished run is recorded in the request's audit trail and shown live on the progress screen, next to the enforced order. Tests: `backend/tests/test_sequence_guard.py`. |
 | **History and audit trail** | Requests, steps and who-did-what are stored in SQLite (`backend/medbridge.db`). |
 | **Denial → appeal** | On a simulated denial the agent drafts an appeal citing the retrieved policy text. Appeals still need physician review. |
 
@@ -111,15 +116,17 @@ The rule fixed the question it was designed from and made the held-out set perfe
 
 **Chunk-size ablation** (`python -m eval.ablation_eval`, same 34 queries, payer filter on / off; results in `eval/results/retrieval_ablation.json`):
 
-| Chunk words (overlap) | Chunks | MRR, filter on | MRR, filter off |
-|---|---|---|---|
-| 80 (15) | 377 | 0.93 | 0.74 |
-| 160 (30), current | 191 | 0.89 | 0.66 |
-| 320 (60) | 97 | 0.91 | 0.74 |
-| 640 (120) | 50 | 0.86 | 0.57 |
-| 160 (0) | 157 | 0.90 | 0.65 |
+| Chunk words (overlap) | Chunks | MRR, filter on | MRR, filter off | Passage MRR@20 | Passage Recall@5 |
+|---|---|---|---|---|---|
+| 80 (15) | 377 | 0.93 | 0.74 | 0.50 | 0.74 |
+| 160 (30), current | 191 | 0.89 | 0.66 | 0.60 | 0.84 |
+| 320 (60) | 97 | 0.91 | 0.74 | 0.66 | 0.93 |
+| 640 (120) | 50 | 0.86 | 0.57 | 0.74 | 0.93 |
+| 160 (0) | 157 | 0.90 | 0.65 | 0.57 | 0.81 |
 
 With the payer filter, sizes from 80 to 320 words all reach Recall@5 of 1.00 and differ only slightly in MRR; very large chunks are worst, especially without the filter. Smaller chunks (80 words) did slightly better than the current 160 here, but with 34 queries a difference of a few hundredths is within noise, so the setting was not changed.
+
+**Passage-level retrieval** (`python -m eval.passage_eval`, the 69 answerable chat questions, payer filter on; results in `eval/results/passage_eval.json`): a hit requires the retrieved chunk to contain the answer, not only to come from the right document. At the current chunk size, document Recall@1 is 0.87 but passage Recall@1 is 0.42 (Recall@5 0.84). The passage columns in the table above favour larger chunks, partly because an answer is less often split across two chunks and partly because a larger chunk contains more text by construction; the two metrics point in opposite directions, so the chunk size was left at 160 words.
 
 ---
 
@@ -160,6 +167,7 @@ pip install pymupdf                  # only needed to rebuild the corpus
 python -m rag.build_corpus           # required: downloads the public policy documents (they are not committed)
 python -m rag.store                  # build the vector index
 python -m mimic_loader               # download + load the open MIMIC-IV demo patients (demo form uses patient 10021312)
+python -m synthea_loader             # optional: load Synthea synthetic patients (generate the CSVs first; see the top of synthea_loader.py)
 python -m uvicorn main:app --port 8000   # `python -m` makes sure the venv's packages are used
 
 # 3. Frontend
@@ -176,9 +184,10 @@ The Docker files are from the hackathon version and have not been updated.
 
 ```bash
 cd backend
-python -m pytest tests                                   # 23 unit tests: FHIR mock, sign-in, roles, accounts (no LLM calls)
+python -m pytest tests                                   # 44 unit tests: FHIR mock, FHIR upload, sign-in, roles, accounts, tool order (no LLM calls)
 python -m eval.retrieval_eval                            # retrieval: Recall@k and MRR over 34 queries
-python -m eval.ablation_eval                             # chunk-size and overlap ablation
+python -m eval.passage_eval                             # retrieval at passage level (does the chunk contain the answer)
+python -m eval.ablation_eval                             # chunk-size and overlap ablation (document and passage level)
 python -m eval.agent_eval --provider bedrock --runs 5    # agent tool sequence (needs provider credentials)
 python -m eval.chat_eval --provider bedrock --mode both  # chatbot, 36 questions, with vs without retrieval
 python -m eval.chat_eval --provider bedrock --mode static  # ablation: hard-coded table instead of retrieval
@@ -212,7 +221,7 @@ With sign-in on, the chat, workflow, history, team and reset endpoints need the 
 
 ## Limitations
 
-- Payer submission and payer decisions are simulated. Patient data is only the 100-patient open MIMIC-IV demo: hospital admissions, no outpatient notes, so conservative-therapy duration cannot be confirmed from a record. The policy-scan tool reports only retrieved passages (no hard-coded coverage rules); the payer portal and submission method are simulated.
+- Payer submission and payer decisions are simulated. Patient data is only the 100-patient open MIMIC-IV demo: hospital admissions, no outpatient notes, so conservative-therapy duration cannot be confirmed from a record. Synthea patients do carry therapy durations, but they are synthetic, and Synthea does not model sciatica, radiculopathy or lumbar imaging. The policy-scan tool reports only retrieved passages (no hard-coded coverage rules); the payer portal and submission method are simulated.
 - Small policy corpus (12 documents; Aetna, Medicare, two Blue Cross Blue Shield plans, UnitedHealthcare and Cigna site-of-care only, plus one benefits-manager guideline; no Humana or Medicaid, and no payer-specific lumbar-MRI criteria for UnitedHealthcare or Cigna).
 - Sign-in is a prototype control, not production authentication: the demo PINs are public, there is no email verification or password reset, tokens last 8 hours and can only be invalidated by removing or changing the account, and anyone who can reach the server can create a staff account. With `MEDBRIDGE_AUTH=off` the reviewer name is free text.
 - The chatbot sometimes misses an answer that is in the corpus: it writes its own search query, and answers inside long policies (the Blue Cross Blue Shield of South Carolina one in particular) can rank below passages of shorter, more general documents. Evaluation sets are small and hand-written (see above).
@@ -221,7 +230,7 @@ With sign-in on, the chat, workflow, history, team and reset endpoints need the 
 
 ## Roadmap
 
-Full MIMIC-IV (needs credentialed access) or Synthea for more patients, Humana and Medicaid policy documents, and checking the FHIR-shaped messages against the Da Vinci Prior Authorization Support profiles.
+Full MIMIC-IV (needs credentialed access) for more real patients, Humana and Medicaid policy documents, and checking the FHIR-shaped messages against the Da Vinci Prior Authorization Support profiles.
 
 ## Built With
 
