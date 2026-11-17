@@ -39,9 +39,32 @@ def save_patient_record(subject_id: str, record: dict) -> None:
 
 
 def get_patient_record(subject_id: str) -> dict | None:
+    """Uploaded FHIR record, MIMIC-IV demo record, else a Synthea one (same keys plus outpatient back-pain fields)."""
     import json
-    row = _conn.execute("SELECT data FROM patient_records WHERE subject_id = ?", (str(subject_id).strip(),)).fetchone()
+    sid = str(subject_id).strip()
+    if sid.startswith("upload-"):  # uploaded FHIR bundles live only in memory (fhir_import)
+        import fhir_import
+        return fhir_import.get_upload(sid)
+    _conn.execute("CREATE TABLE IF NOT EXISTS patient_records (subject_id TEXT PRIMARY KEY, data TEXT)")
+    row = _conn.execute("SELECT data FROM patient_records WHERE subject_id = ?", (sid,)).fetchone()
+    if not row:
+        _synthea_table()
+        row = _conn.execute("SELECT data FROM synthea_records WHERE patient_id = ?", (sid.lower(),)).fetchone()
     return json.loads(row[0]) if row else None
+
+
+# --- Synthea synthetic patients (loaded by synthea_loader.py), kept apart from the MIMIC records ---
+def _synthea_table() -> None:
+    _conn.execute("CREATE TABLE IF NOT EXISTS synthea_records (patient_id TEXT PRIMARY KEY, data TEXT)")
+
+
+def replace_synthea_records(records: dict[str, dict]) -> None:
+    import json
+    _synthea_table()
+    with _conn:
+        _conn.execute("DELETE FROM synthea_records")
+        _conn.executemany("INSERT INTO synthea_records VALUES (?, ?)",
+                          [(pid.lower(), json.dumps(r)) for pid, r in records.items()])
 
 
 # --- user accounts (see auth.py). The password is stored only as a salted scrypt hash. ---

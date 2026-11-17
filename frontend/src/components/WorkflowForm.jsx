@@ -1,7 +1,7 @@
 import { cloneElement, useId, useState } from 'react';
 import Icon from './Icon';
 import MicButton from './MicButton';
-import { voiceSupported } from './speech';
+import PatientUpload from './PatientUpload';
 
 function Field({ label, required, action, children }) {
   const id = useId();
@@ -72,7 +72,19 @@ export default function WorkflowForm({ vertical, onSubmit, onBack, loading }) {
   const dictate = (k) => (t) => setForm(f => ({ ...f, [k]: f[k] ? `${f[k]} ${t}` : t }));
   // Free-text fields only; IDs, codes and numbers are better typed.
   const canDictate = (f) => f.type === 'textarea' || /name|^requesting_physician$/i.test(f.key);
-  const loadDemo = () => setForm({ ...initialForm, ...vertical.demo_data, demo_scenario: denialDemo ? 'Denial + Auto-Appeal' : 'Standard Approval' });
+  const loadDemo = (data = vertical.demo_data) => setForm({ ...initialForm, ...data, demo_scenario: denialDemo ? 'Denial + Auto-Appeal' : 'Standard Approval' });
+
+  // An uploaded bundle fills the patient fields and the diagnosis code; other empty fields take the demo values so
+  // the request can be sent straight away (all editable).
+  const fromUpload = ({ patient_id, summary }) => setForm(f => {
+    const base = Object.fromEntries(Object.entries(f).map(([k, v]) => [k, String(v ?? '').trim() ? v : (vertical.demo_data?.[k] ?? v)]));
+    return {
+      ...base, patient_id, patient_name: summary.name, patient_dob: summary.birth_date,
+      ...(summary.suggested_diagnosis_code ? { diagnosis_code: summary.suggested_diagnosis_code } : {}),
+    };
+  });
+  const clearUpload = () => setForm(f => (String(f.patient_id).startsWith('upload-')
+    ? { ...f, patient_id: '', patient_name: '', patient_dob: '' } : f));
 
   const visibleFields = vertical.form_fields.filter(f => !HIDDEN_FIELDS.includes(f.key));
 
@@ -154,21 +166,25 @@ export default function WorkflowForm({ vertical, onSubmit, onBack, loading }) {
                 <p style={{ margin: 0, color: '#52525b', fontSize: 14.5 }}>Fill this in once. MedBridge prepares it and shows you the result to approve.</p>
               </div>
             </div>
-            <button type="button" onClick={loadDemo}
-              style={{ background: 'white', border: '1px solid #d4d4d8', color: '#18181b', padding: '9px 18px', borderRadius: 100, cursor: 'pointer', fontSize: 13.5, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 7, boxShadow: '0 1px 2px rgba(24,24,27,0.05)' }}>
-              <Icon name="sparkle" size={16} /> Try Demo
-            </button>
-          </div>
-          <div style={{ marginTop: 14, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {['Simulated payer', 'MIMIC-IV demo data', 'Do not enter real patient data', ...(voiceSupported ? ['Dictation uses your browser speech service'] : [])].map(t => (
-              <span key={t} style={{ fontSize: 12, fontWeight: 700, color: '#52525b', background: 'white', border: '1px solid #e7e5e4', borderRadius: 100, padding: '3px 10px' }}>{t}</span>
-            ))}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {[[vertical.demo_data, 'Try Demo', 'Hospital patient from the MIMIC-IV demo'],
+                [vertical.demo_data_outpatient, 'Outpatient demo', 'Synthetic outpatient patient with a therapy history']].filter(d => d[0]).map(([data, label, title]) => (
+                <button key={label} type="button" onClick={() => loadDemo(data)} title={title}
+                  style={{ background: 'white', border: '1px solid #d4d4d8', color: '#18181b', padding: '9px 18px', borderRadius: 100, cursor: 'pointer', fontSize: 13.5, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 7, boxShadow: '0 1px 2px rgba(24,24,27,0.05)' }}>
+                  <Icon name="sparkle" size={16} /> {label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} style={{ padding: '32px 36px' }}>
 
-          {/* Dynamic fields */}
+          <section className="form-section" aria-labelledby="sec-upload">
+            <h3 id="sec-upload" className="form-sec-head"><span aria-hidden="true"><Icon name="file" size={13} /></span>Patient record (optional)</h3>
+            <PatientUpload onLoaded={fromUpload} onClear={clearUpload} />
+          </section>
+
           {/* Dynamic fields, grouped into short sections */}
           {sections.map((sec, n) => (
             <section key={sec.title} className="form-section" aria-labelledby={`sec-${n}`}>

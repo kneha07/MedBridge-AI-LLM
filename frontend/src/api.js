@@ -1,5 +1,5 @@
 // Shared fetch helper. When the server has sign-in turned on, the token is sent with every request.
-export const API = 'http://localhost:8000';
+export const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const KEY = 'medbridge_session';
 let session = null; // { token, name, role }

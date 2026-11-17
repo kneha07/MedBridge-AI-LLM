@@ -53,6 +53,7 @@ class WorkflowStatusResponse(BaseModel):
     form_data: Optional[dict] = None
     audit: List[dict] = []
     submitted_by: Optional[str] = None  # signed-in user who created it, when sign-in is on
+    guard: Optional[dict] = None  # enforced tool order and what the SequenceGuard did: {"order", "events"}
 
 
 class ApprovalRequest(BaseModel):

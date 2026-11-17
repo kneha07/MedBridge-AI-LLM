@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import Icon from './Icon';
 import CitationDrawer from './CitationDrawer';
+import PatientTimeline from './PatientTimeline';
+import { requiredWeeks, therapyCheck } from './timelineRules';
 
 // Status meanings stay fixed everywhere: green = on file, amber = check it, grey = not available. Icon + label, never color alone.
 const CHECK = {
@@ -39,26 +41,32 @@ export function ApprovalCard({ workflow, onDecide, user }) {
   const policy = stepData('Scanning Insurance Policy');
   const records = stepData('Analyzing Medical Records');
   const form = stepData('Completing Authorization Form');
+  const src = String(records.source || '');
+  const dataset = src.startsWith('Synthea') ? 'Synthea synthetic patients' : src.startsWith('Uploaded') ? 'uploaded FHIR bundle' : 'MIMIC-IV demo';
 
   const rows = [
     ['Patient', f.patient_name], ['Payer', f.insurance_provider], ['Service', `${f.treatment_type} — ${f.diagnosis_code}`],
     ['Requesting physician', f.requesting_physician],
     ['Form completeness', form.completeness_score != null ? `${Math.round(form.completeness_score * 100)}%` : null],
-    ['Patient record found', records.patient_found == null ? null : (records.patient_found ? 'Yes (MIMIC-IV demo)' : 'No')],
+    ['Patient record found', records.patient_found == null ? null : (records.patient_found ? `Yes (${dataset})` : 'No')],
     ['Requested diagnosis on record', records.requested_diagnosis_on_record == null ? null : (records.requested_diagnosis_on_record ? 'Yes' : 'No')],
     ['Policy sources', policy.policy_sources],
   ].filter(r => r[1] != null && r[1] !== '');
 
   const passages = policy.policy_passages || [];
+  const timeline = records.timeline;
+  const rule = timeline ? requiredWeeks(passages) : null;
+  const therapy = therapyCheck(timeline, rule);
   const sources = (policy.policy_sources || '').split(';').map(x => x.trim()).filter(Boolean);
   const pct = form.completeness_score != null ? Math.round(form.completeness_score * 100) : null;
   const checks = [
     ['Policy evidence', sources.length ? 'ok' : 'unknown',
       sources.length ? `${sources.length} source${sources.length > 1 ? 's' : ''} cited from the payer's own documents.` : 'No policy passages were retrieved for this payer. Check the payer rules directly.'],
     ['Patient record', records.patient_found == null ? 'unknown' : records.patient_found ? 'ok' : 'check',
-      records.patient_found == null ? 'The record lookup did not report a result.' : records.patient_found ? 'Found in the MIMIC-IV demo data.' : 'No matching record. Do not rely on the clinical summary.'],
+      records.patient_found == null ? 'The record lookup did not report a result.' : records.patient_found ? (src.startsWith('Uploaded') ? 'Read from the uploaded FHIR bundle.' : `Found in the ${dataset} data.`) : 'No matching record. Do not rely on the clinical summary.'],
     ['Requested diagnosis', records.requested_diagnosis_on_record == null ? 'unknown' : records.requested_diagnosis_on_record ? 'ok' : 'check',
       records.requested_diagnosis_on_record == null ? 'Not reported.' : records.requested_diagnosis_on_record ? `${f.diagnosis_code} appears in the patient's record.` : `${f.diagnosis_code} does not appear in the record. Confirm before approving.`],
+    ...(therapy ? [['Conservative therapy duration', therapy.state, therapy.detail]] : []),
     ['Form completeness', pct == null ? 'unknown' : pct >= 90 ? 'ok' : 'check', pct == null ? 'Not reported.' : `${pct}% of required fields filled.`],
   ];
   const needsLook = checks.filter(c => c[1] === 'check').length;
@@ -95,6 +103,7 @@ export function ApprovalCard({ workflow, onDecide, user }) {
           <div style={{ display: 'grid', gap: 8 }}>
             {checks.map(([t, st, d]) => <Check key={t} state={st} title={t} detail={d} />)}
           </div>
+          {timeline && <div style={{ marginTop: 14 }}><PatientTimeline timeline={timeline} rule={rule} source={String(records.source || '').startsWith('Uploaded') ? 'Uploaded FHIR bundle' : 'Synthea synthetic patient'} /></div>}
           {sources.length > 0 && (
             <div style={{ marginTop: 14 }}>
               <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 0.6, textTransform: 'uppercase', color: '#71717a', marginBottom: 6 }}>Policy sources</div>
@@ -145,6 +154,7 @@ export function ApprovalCard({ workflow, onDecide, user }) {
 const ACTION_LABELS = {
   created: 'Request created', started: 'Agent started', approval_requested: 'Review requested',
   approved: 'Approved', rejected_by_reviewer: 'Rejected', completed: 'Completed', rejected: 'Stopped (rejected)', error: 'Error',
+  guard_refused: 'Out-of-order call refused', guard_nudged: 'Model asked to finish the steps', guard_incomplete: 'Ended with steps missing',
 };
 
 export function AuditTrail({ audit }) {

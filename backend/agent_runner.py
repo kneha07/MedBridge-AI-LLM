@@ -55,12 +55,74 @@ def build_user_message(vertical_id: str, form_data: dict) -> str:
     return f"Process the following {v.VERTICAL_NAME} request:\n\n{fields}{scenario_note}\n\nComplete all steps now."
 
 
-UI_ONLY_KEYS = ("fhir_bundle", "fhir_claim_response")  # shown in the UI, not needed by the model
+UI_ONLY_KEYS = ("fhir_bundle", "fhir_claim_response", "timeline")  # shown in the UI, not needed by the model
 
 
 def for_model(result: dict) -> dict:
     """The tool result the model sees: without the large FHIR payloads, which only the UI displays."""
     return {k: v for k, v in result.items() if k not in UI_ONLY_KEYS}
+
+
+MAX_NUDGES = 2  # times the runner asks the model to continue when it stops before the required steps are done
+
+
+class SequenceGuard:
+    """Enforces the vertical's tool order in code instead of relying on the prompt.
+
+    A tool called before its prerequisites, or a run-once tool called again, is not executed: the model gets an
+    error result naming the step to call instead. Verticals without TOOL_ORDER are not constrained.
+    """
+
+    def __init__(self, vertical, on_event: Callable | None = None):
+        self.on_event = on_event or (lambda event: None)  # refusals, nudges and an unfinished end, for the UI and audit
+        self.order = tuple(getattr(vertical, "TOOL_ORDER", ()))
+        self.run_once = set(getattr(vertical, "RUN_ONCE", ()))
+        self.conditional = getattr(vertical, "conditional_tools", lambda results: ())
+        self.gated = set(getattr(vertical, "CONDITIONAL_TOOLS", ()))  # may run only when conditional_tools asks
+        self.results: dict = {}
+        self.refusals = 0
+
+    def required(self) -> tuple:
+        return self.order + tuple(self.conditional(self.results)) if self.order else ()
+
+    def missing(self) -> list[str]:
+        return [t for t in self.required() if t not in self.results]
+
+    def check(self, tool_name: str) -> str | None:
+        """None if the tool may run now, otherwise the reason it may not."""
+        if not self.order:
+            return None
+        if tool_name in self.run_once and tool_name in self.results:
+            return f"{tool_name} has already run in this request and must not run again."
+        required = self.required()
+        if tool_name in required:
+            before = [t for t in required[:required.index(tool_name)] if t not in self.results]
+            if before:
+                return f"Out of order: call {before[0]} before {tool_name}."
+        elif tool_name in self.gated:
+            return f"{tool_name} is not applicable: no result so far calls for it."
+        return None
+
+    def record(self, tool_name: str, result: dict):
+        self.results[tool_name] = result
+
+    def refuse(self, reason: str, tool_name: str = "") -> dict:
+        self.refusals += 1
+        nxt = (self.missing() or [None])[0]
+        self.on_event({"kind": "refused", "tool": tool_name, "reason": reason, "next": nxt})
+        return {"error": reason, "next_required_step": nxt}
+
+    def nudge(self) -> str:
+        self.on_event({"kind": "nudged", "missing": self.missing()})
+        return (f"The request is not finished. Still required, in order: {', '.join(self.missing())}. "
+                f"Call {self.missing()[0]} now.")
+
+
+def _save_stats(stats: dict | None, guard: SequenceGuard, nudges: int):
+    if guard.missing():
+        guard.on_event({"kind": "incomplete", "missing": guard.missing()})
+    if stats is not None:
+        stats.update(refused_calls=guard.refusals, nudges=nudges, missing_steps=guard.missing())
 
 
 async def _fire_callback(tool_name: str, status: str, vertical, result: dict | None, callback: Callable):
@@ -104,8 +166,9 @@ async def _fire_callback(tool_name: str, status: str, vertical, result: dict | N
 
 
 async def run_agent_claude(vertical_id: str, form_data: dict, callback: Callable, gate: Callable | None = None,
-                           provider: str = "claude") -> str:
+                           provider: str = "claude", stats: dict | None = None, on_guard: Callable | None = None) -> str:
     vertical = get_vertical(vertical_id)
+    guard, nudges = SequenceGuard(vertical, on_guard), 0
     if hasattr(vertical, 'set_form_data'):
         vertical.set_form_data(form_data)
     client = get_anthropic(provider)
@@ -130,23 +193,36 @@ async def run_agent_claude(vertical_id: str, form_data: dict, callback: Callable
             tool_results = []
 
             for tu in tool_uses:
+                reason = guard.check(tu.name)
+                if reason:
+                    tool_results.append({"type": "tool_result", "tool_use_id": tu.id, "is_error": True,
+                                         "content": json.dumps(guard.refuse(reason, tu.name))})
+                    continue
                 if gate and tu.name in getattr(vertical, "APPROVAL_REQUIRED", ()) and not await gate(tu.name):
                     return REJECTED_MESSAGE
                 await _fire_callback(tu.name, "running", vertical, None, callback)
                 result = await vertical.execute_tool(tu.name, tu.input)
+                guard.record(tu.name, result)
                 await _fire_callback(tu.name, "done", vertical, result, callback)
                 tool_results.append({"type": "tool_result", "tool_use_id": tu.id, "content": json.dumps(for_model(result))})
 
             messages.append({"role": "user", "content": tool_results})
 
-        elif response.stop_reason == "end_turn":
-            return "".join(b.text for b in response.content if hasattr(b, "text"))
+        elif response.stop_reason == "end_turn" and guard.missing() and nudges < MAX_NUDGES:
+            nudges += 1
+            messages.append({"role": "assistant", "content": response.content})
+            messages.append({"role": "user", "content": guard.nudge()})
         else:
+            _save_stats(stats, guard, nudges)
+            if response.stop_reason == "end_turn":
+                return "".join(b.text for b in response.content if hasattr(b, "text"))
             return f"Completed: {response.stop_reason}"
 
 
-async def run_agent_groq(vertical_id: str, form_data: dict, callback: Callable, gate: Callable | None = None) -> str:
+async def run_agent_groq(vertical_id: str, form_data: dict, callback: Callable, gate: Callable | None = None,
+                         stats: dict | None = None, on_guard: Callable | None = None) -> str:
     vertical = get_vertical(vertical_id)
+    guard, nudges = SequenceGuard(vertical, on_guard), 0
     if hasattr(vertical, 'set_form_data'):
         vertical.set_form_data(form_data)
     client = get_groq()
@@ -186,24 +262,36 @@ async def run_agent_groq(vertical_id: str, form_data: dict, callback: Callable, 
         messages.append({"role": "assistant", "content": msg.content, "tool_calls": msg.tool_calls})
 
         if not msg.tool_calls:
+            if guard.missing() and nudges < MAX_NUDGES:
+                nudges += 1
+                messages.append({"role": "user", "content": guard.nudge()})
+                continue
+            _save_stats(stats, guard, nudges)
             return msg.content or "Processing complete."
 
         for tc in msg.tool_calls:
             tool_name = tc.function.name
-            tool_input = json.loads(tc.function.arguments)
+            tool_input = json.loads(tc.function.arguments or "{}")
 
+            reason = guard.check(tool_name)
+            if reason:
+                messages.append({"role": "tool", "tool_call_id": tc.id, "content": json.dumps(guard.refuse(reason, tool_name))})
+                continue
             if gate and tool_name in getattr(vertical, "APPROVAL_REQUIRED", ()) and not await gate(tool_name):
                 return REJECTED_MESSAGE
             await _fire_callback(tool_name, "running", vertical, None, callback)
             result = await vertical.execute_tool(tool_name, tool_input)
+            guard.record(tool_name, result)
             await _fire_callback(tool_name, "done", vertical, result, callback)
 
             messages.append({"role": "tool", "tool_call_id": tc.id, "content": json.dumps(for_model(result))})
 
 
 async def run_agent(vertical_id: str, ai_provider: str, form_data: dict, callback: Callable,
-                    gate: Callable | None = None) -> str:
+                    gate: Callable | None = None, stats: dict | None = None, on_guard: Callable | None = None) -> str:
+    """Runs the agent. If `stats` is a dict, it receives the guard's counts (refused calls, nudges, missing steps);
+    `on_guard(event)` is called at each refusal, nudge, and when a run ends with steps missing."""
     ai_provider = os.environ.get("AI_PROVIDER") or ai_provider  # lets .env switch provider without a UI change
     if ai_provider == "groq":
-        return await run_agent_groq(vertical_id, form_data, callback, gate)
-    return await run_agent_claude(vertical_id, form_data, callback, gate, provider=ai_provider)
+        return await run_agent_groq(vertical_id, form_data, callback, gate, stats, on_guard)
+    return await run_agent_claude(vertical_id, form_data, callback, gate, provider=ai_provider, stats=stats, on_guard=on_guard)

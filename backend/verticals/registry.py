@@ -17,6 +17,7 @@ def list_verticals():
             "color": v.VERTICAL_COLOR,
             "form_fields": v.FORM_FIELDS,
             "demo_data": v.DEMO_DATA,
+            "demo_data_outpatient": getattr(v, "DEMO_DATA_OUTPATIENT", None),
         }
         for v in VERTICALS.values()
     ]

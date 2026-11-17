@@ -3,7 +3,11 @@ import uuid
 from datetime import datetime
 from typing import Dict
 
-from fastapi import Depends, FastAPI, BackgroundTasks, HTTPException
+import json
+from pathlib import Path
+
+from fastapi import Depends, FastAPI, BackgroundTasks, File, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
@@ -11,9 +15,10 @@ load_dotenv(dotenv_path="../.env")
 
 import auth
 import db
+import fhir_import
 from models import ApprovalRequest, WorkflowRequest, WorkflowStatus, WorkflowStatusResponse, AgentStep, StepStatus, SubmitResponse
 from agent_runner import run_agent
-from verticals.registry import list_verticals
+from verticals.registry import get_vertical, list_verticals
 from chat import chat as run_chat
 from pydantic import BaseModel
 
@@ -82,8 +87,33 @@ async def process_workflow(workflow_id: str, request: WorkflowRequest):
         store[workflow_id].updated_at = datetime.utcnow().isoformat()
         db.save(store[workflow_id])
 
+    vertical = get_vertical(request.vertical_id)
+    display = lambda t: vertical.STEP_DISPLAY.get(t, (t,))[0] if t else t
+    if getattr(vertical, "TOOL_ORDER", None):
+        store[workflow_id].guard = {"order": [display(t) for t in vertical.TOOL_ORDER], "events": []}
+
+    def _plain(text: str) -> str:  # tool names -> the step names the UI shows
+        for t in sorted(vertical.STEP_DISPLAY, key=len, reverse=True):
+            text = text.replace(t, display(t))
+        return text
+
+    def on_guard(event: dict):
+        wf = store[workflow_id]
+        shown = {**event, **({"tool": display(event["tool"])} if event.get("tool") else {}),
+                 **({"next": display(event["next"])} if event.get("next") else {}),
+                 **({"missing": [display(t) for t in event["missing"]]} if event.get("missing") else {}),
+                 **({"reason": _plain(event["reason"])} if event.get("reason") else {}),
+                 "ts": datetime.utcnow().isoformat()}
+        if wf.guard is not None:
+            wf.guard["events"].append(shown)
+        note = {"refused": lambda e: f'{e["tool"]} refused: {e["reason"]}',
+                "nudged": lambda e: f'model stopped early; asked to finish {", ".join(e["missing"])}',
+                "incomplete": lambda e: f'run ended without {", ".join(e["missing"])}'}[event["kind"]](shown)
+        log(wf, "guard", f'guard_{event["kind"]}', note)
+
     try:
-        result = await run_agent(request.vertical_id, request.ai_provider, request.form_data, step_callback, gate)
+        result = await run_agent(request.vertical_id, request.ai_provider, request.form_data, step_callback, gate,
+                                 on_guard=on_guard)
         wf = store[workflow_id]
         rejected = workflow_id in approvals and not approvals[workflow_id]["approved"]
         wf.status = WorkflowStatus.rejected if rejected else WorkflowStatus.submitted
@@ -165,6 +195,47 @@ async def set_role(name: str, body: RoleRequest, user: auth.User | None = Depend
 @app.get("/api/verticals")
 async def get_verticals():
     return list_verticals()
+
+
+MAX_UPLOAD_BYTES = 25 * 1024 * 1024
+SAMPLES_DIR = Path(__file__).parent / "samples"
+SAMPLES = [  # synthetic Synthea patients, trimmed to the resources the importer reads
+    {"file": "sample-pt-8-weeks.json", "label": "Physical therapy, 8 weeks", "description": "Chronic low back pain, 10 physical-therapy sessions over 8 weeks, ibuprofen."},
+    {"file": "sample-no-therapy.json", "label": "No physical therapy", "description": "Low back pain with prescriptions only; their stop dates are not in the file."},
+    {"file": "sample-opioid-history.json", "label": "Opioid history", "description": "Physical therapy plus repeated oxycodone prescriptions."},
+]
+
+
+@app.post("/api/patient-records/upload")
+async def upload_patient_record(file: UploadFile = File(...), user: auth.User | None = Depends(auth.current_user)):
+    """Read a FHIR R4 patient bundle. The record is kept in memory for two hours and never saved to the database."""
+    raw = await file.read(MAX_UPLOAD_BYTES + 1)
+    if len(raw) > MAX_UPLOAD_BYTES:
+        raise HTTPException(413, "The file is larger than 25 MB.")
+    try:
+        bundle = json.loads(raw)
+    except ValueError:
+        raise HTTPException(400, "The file is not JSON. Upload a FHIR R4 patient bundle (.json).")
+    try:
+        record = fhir_import.record_from_bundle(bundle)
+    except fhir_import.BundleError as e:
+        raise HTTPException(400, str(e))
+    except Exception:
+        raise HTTPException(400, "The bundle could not be read. Check that it is a FHIR R4 patient bundle.")
+    patient_id = fhir_import.save_upload(record, user.name if user else "")
+    return {"patient_id": patient_id, "expires_in_seconds": fhir_import.UPLOAD_TTL, "summary": fhir_import.summary(record)}
+
+
+@app.get("/api/patient-records/samples")
+async def list_samples():
+    return SAMPLES
+
+
+@app.get("/api/patient-records/samples/{name}")
+async def get_sample(name: str):
+    if name not in {s["file"] for s in SAMPLES}:
+        raise HTTPException(404, "No such sample")
+    return FileResponse(SAMPLES_DIR / name, media_type="application/fhir+json", filename=name)
 
 
 @app.post("/api/workflow/submit", response_model=SubmitResponse)

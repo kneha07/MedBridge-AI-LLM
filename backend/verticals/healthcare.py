@@ -115,6 +115,19 @@ STEP_DISPLAY = {
 # Tools that must be approved by a human reviewer before they run (outward-facing actions).
 APPROVAL_REQUIRED = ("submit_authorization",)
 
+# Enforced by the agent runner (SequenceGuard): each tool needs the ones before it, and the run is not
+# finished until all of them have run. Tools in RUN_ONCE are refused a second time.
+TOOL_ORDER = ("scan_insurance_policy", "analyze_medical_records", "fill_authorization_form",
+              "submit_authorization", "track_authorization_status")
+RUN_ONCE = ("submit_authorization",)
+CONDITIONAL_TOOLS = ("draft_appeal",)
+
+
+def conditional_tools(results: dict) -> tuple:
+    """Tools that become required after TOOL_ORDER, given the results so far: an appeal after a denial."""
+    status = str(results.get("track_authorization_status", {}).get("current_status", "")).upper()
+    return ("draft_appeal",) if status == "DENIED" else ()
+
 FORM_FIELDS = [
     {"key": "patient_name",         "label": "Patient Full Name",         "type": "text",     "required": True,  "placeholder": "e.g. Margaret R. Thompson"},
     {"key": "patient_dob",          "label": "Date of Birth",             "type": "date",     "required": True,  "placeholder": ""},
@@ -143,6 +156,17 @@ DEMO_DATA = {
     "requesting_physician": "Dr. Sarah Chen",
     "physician_npi": "1234567890",
     "demo_scenario": "Standard Approval",
+}
+
+# An outpatient case from the Synthea synthetic patients (synthea_loader.py): chronic low back pain diagnosed
+# 2026-01-03, ten physical-therapy sessions and ibuprofen. Synthetic, so the name is a label too.
+DEMO_DATA_OUTPATIENT = {
+    **DEMO_DATA,
+    "patient_name": "Synthea patient 583ab65e",
+    "patient_dob": "2008-01-01",
+    "patient_id": "583ab65e-8262-f764-96b4-8ec18cc960e3",
+    "diagnosis_code": "M54.50",
+    "treatment_description": "Lumbar spine MRI for chronic low back pain persisting after eight weeks of physical therapy and NSAIDs.",
 }
 
 # Per-run form data — set by agent_runner before tool calls. A ContextVar is scoped to the
@@ -189,11 +213,13 @@ async def execute_tool(tool_name: str, tool_input: dict) -> dict:
         record = db.get_patient_record(tool_input.get("patient_id", ""))
         if not record:
             return {"patient_found": False,
-                    "note": "No record for this patient ID. The demo holds the 100 MIMIC-IV demo patients; "
-                            "do not assume any clinical history."}
+                    "note": "No record for this patient ID. The demo holds the 100 MIMIC-IV demo patients and the "
+                            "Synthea synthetic patients; uploaded records expire after two hours. "
+                            "Do not assume any clinical history."}
         code = re.sub(r"[^A-Za-z0-9]", "", tool_input.get("diagnosis_code", "")).upper()
-        matching = [d for d in record["diagnoses"] if code and d["code"].upper().startswith(code[:4])]
-        return {
+        matching = [d for d in record["diagnoses"]  # Synthea diagnoses are SNOMED, with the ICD-10 code in "icd10"
+                    if code and any(c.upper().replace(".", "").startswith(code[:4]) for c in (d["code"], d.get("icd10", "")) if c)]
+        result = {
             "patient_found": True,
             "source": record["source"],
             "age": record["age"],
@@ -205,6 +231,27 @@ async def execute_tool(tool_name: str, tool_input: dict) -> dict:
             "limitations": "Hospital admission data only: no outpatient notes, symptom duration or prior imaging. "
                            "The duration of conservative therapy the payer requires cannot be confirmed from this record.",
         }
+        if "conservative_therapy" in record:  # Synthea: outpatient back-pain history is available
+            therapy = record["conservative_therapy"]
+            result.update(
+                first_back_pain_diagnosis_date=record["first_back_pain_diagnosis_date"],
+                back_pain_encounters=len(record["back_pain_encounters"]),
+                conservative_therapy={k: therapy[k] for k in ("start", "end", "total_weeks")},
+                conservative_therapy_detail=therapy["medications"][:8]
+                + [{k: v for k, v in t.items() if k != "session_dates"} for t in therapy["therapy"]],
+                prior_imaging=record["prior_imaging"],
+                limitations="Synthetic outpatient record: therapy durations come from prescription and procedure dates, "
+                            "not clinician notes. Synthea does not model radiculopathy, neurological findings or "
+                            "lumbar imaging, so an empty prior_imaging list does not mean imaging was never done."
+                            + (" Uploaded FHIR bundle: prescriptions carry no stop date, so completed ones count as a "
+                               "single day (stop_date_unknown) and medication duration is understated."
+                               if record["source"].startswith("Uploaded") else ""),
+                timeline={"as_of": record["as_of"], "first_back_pain_diagnosis_date": record["first_back_pain_diagnosis_date"],
+                          "visits": [v["date"] for v in record["back_pain_encounters"]],
+                          "medications": therapy["medications"], "therapy": therapy["therapy"],
+                          "imaging": record["prior_imaging"]},  # UI only (agent_runner.UI_ONLY_KEYS)
+            )
+        return result
     elif tool_name == "fill_authorization_form":
         form_id = f"FORM-{uuid.uuid4().hex[:8].upper()}"
         # Measured from the submitted request: share of required form fields that are filled in.
@@ -271,12 +318,18 @@ async def execute_tool(tool_name: str, tool_input: dict) -> dict:
             citation = f"\n\nPolicy basis ({evidence[0]['source']}): ...{excerpt.strip()}..."
         record = db.get_patient_record(_current_form_data.get().get("patient_id", "")) or {}
         want = re.sub(r"[^A-Za-z0-9]", "", _current_form_data.get().get("diagnosis_code", "")).upper()[:4]
-        diagnoses = sorted(record.get("diagnoses", []), key=lambda d: not (want and d["code"].upper().startswith(want)))
+        diagnoses = sorted(record.get("diagnoses", []), key=lambda d: not (want and any(
+            c.upper().replace(".", "").startswith(want) for c in (d["code"], d.get("icd10", "")) if c)))
         dx = "; ".join(f'{d["code"]} {d["title"]}' for d in diagnoses[:3]) or "not available"
         meds = ", ".join(record.get("conservative_therapy_medications", [])[:5]) or "none found in the available record"
+        therapy = record.get("conservative_therapy") or {}
+        therapy_note = (f"Conservative therapy on record (from prescription and procedure dates): about "
+                        f"{therapy['total_weeks']:g} weeks between {therapy['start']} and {therapy['end']}. "
+                        if therapy.get("total_weeks") else "")
         letter = (f"Re: Appeal of Denial — {patient} — {treatment}\n\nDear Medical Director,\n\n"
                   f"We are appealing the denial (CO-50) of {treatment} for {patient}. Request: {(justification or 'see attached').rstrip('.')}. "
                   f"Diagnoses on record: {dx}. Analgesic, NSAID or muscle-relaxant medications on record: {meds}. "
+                  f"{therapy_note}"
                   f"[Physician to complete before signing: symptom duration, conservative therapy tried and for how long, "
                   f"examination findings, prior imaging.]{citation}")
         return {

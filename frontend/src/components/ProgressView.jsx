@@ -29,7 +29,7 @@ function StepIcon({ state }) {
   return <span aria-hidden="true" style={{ ...base, background: '#e7e5e4', color: '#52525b' }} />;
 }
 
-function Step({ name, step, stopped, first, last }) {
+function Step({ name, step, stopped, first, last, refused = 0 }) {
   const state = step ? (step.status === 'done' ? 'done' : 'running') : 'waiting';
   const rows = step?.data ? Object.entries(step.data).filter(([k]) => !HIDE.has(k)) : [];
   const letter = step?.data?.appeal_letter_preview;
@@ -41,7 +41,10 @@ function Step({ name, step, stopped, first, last }) {
       <StepIcon state={state} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
-          <div style={{ fontSize: 16, fontWeight: 700, color: state === 'waiting' ? '#52525b' : '#18181b' }}>{name}</div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: state === 'waiting' ? '#52525b' : '#18181b' }}>
+            {name}
+            {refused > 0 && <span className="guard-step-flag" title="The guard refused this step when the model called it too early">refused {refused > 1 ? `${refused}×` : 'once'} as too early</span>}
+          </div>
           {state === 'done' && step.timestamp && (
             <time style={{ fontSize: 12.5, color: '#71717a', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>{new Date(step.timestamp + 'Z').toLocaleTimeString()}</time>
           )}
@@ -83,6 +86,55 @@ function Step({ name, step, stopped, first, last }) {
         )}
       </div>
     </li>
+  );
+}
+
+// What the server-side SequenceGuard enforced in this run (workflow.guard; absent on older requests).
+const EVENT = {
+  refused: { icon: 'x', fg: '#92400e', bg: '#fffbeb', bd: '#fde68a', title: (e) => `Refused: ${e.tool}`, text: (e) => `${e.reason}${e.next ? ` The model was told to run ${e.next} next.` : ''}` },
+  nudged: { icon: 'arrow-right', fg: '#0f766e', bg: '#f0fdfa', bd: '#99f6e4', title: () => 'Model stopped early, asked to finish', text: (e) => `Still required: ${e.missing.join(', ')}.` },
+  incomplete: { icon: 'alert', fg: '#991b1b', bg: '#fef2f2', bd: '#fecaca', title: () => 'Run ended with steps missing', text: (e) => `Not run: ${e.missing.join(', ')}.` },
+};
+
+function GuardPanel({ guard, byName, denied }) {
+  const events = guard.events || [];
+  return (
+    <section aria-label="Step order enforcement" className="guard-panel">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <span className="guard-badge"><Icon name="scale" size={15} /></span>
+        <strong style={{ fontSize: 15, color: '#18181b' }}>Step order enforced in code</strong>
+        <span style={{ fontSize: 13, color: '#71717a' }}>A call made too early is refused, not run. Submit runs once, only after approval.</span>
+      </div>
+      <ol className="guard-chain">
+        {guard.order.map((n, i) => {
+          const s = byName[n]?.status;
+          return (
+            <li key={n} data-state={s === 'done' ? 'done' : s ? 'running' : undefined}>
+              <span>{i + 1}</span>{n}{n === 'Submitting to Payer Portal' && <em>needs approval</em>}
+            </li>
+          );
+        })}
+        <li data-state={byName['Drafting Appeal Letter']?.status === 'done' ? 'done' : undefined} data-optional={!denied || undefined}>
+          <span>+</span>Drafting Appeal Letter<em>only after a denial</em>
+        </li>
+      </ol>
+      {events.length === 0
+        ? <div className="guard-ok"><Icon name="checkcircle" size={16} /> No out-of-order calls in this run.</div>
+        : <ul style={{ listStyle: 'none', margin: '10px 0 0', padding: 0, display: 'grid', gap: 6 }}>
+            {events.map((e, i) => {
+              const k = EVENT[e.kind] || EVENT.incomplete;
+              return (
+                <li key={i} className="fade-up" style={{ display: 'flex', gap: 10, padding: '9px 12px', borderRadius: 12, background: k.bg, border: `1px solid ${k.bd}`, animationDelay: `${i * 60}ms` }}>
+                  <span style={{ color: k.fg, paddingTop: 1 }}><Icon name={k.icon} size={16} /></span>
+                  <span style={{ flex: 1, minWidth: 0, fontSize: 14, color: '#27272a', lineHeight: 1.45 }}>
+                    <strong style={{ color: k.fg }}>{k.title(e)}</strong> {k.text(e)}
+                  </span>
+                  {e.ts && <time style={{ fontSize: 12, color: '#71717a', fontVariantNumeric: 'tabular-nums' }}>{new Date(e.ts + 'Z').toLocaleTimeString()}</time>}
+                </li>
+              );
+            })}
+          </ul>}
+    </section>
   );
 }
 
@@ -145,9 +197,14 @@ export default function ProgressView({ workflowData, onDecide, onStartNew, user 
         </section>
       )}
 
+      {workflowData?.guard?.order?.length > 0 && (
+        <GuardPanel guard={workflowData.guard} byName={byName} denied={steps.some(s => s.data?.current_status === 'DENIED')} />
+      )}
+
       <section aria-label="Steps" className="pv-steps">
         <ol style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-          {names.map((n, i) => <Step key={n} name={n} step={byName[n]} stopped={stopped} first={i === 0} last={i === names.length - 1} />)}
+          {names.map((n, i) => <Step key={n} name={n} step={byName[n]} stopped={stopped} first={i === 0} last={i === names.length - 1}
+            refused={(workflowData?.guard?.events || []).filter(e => e.kind === 'refused' && e.tool === n).length} />)}
         </ol>
       </section>
 
