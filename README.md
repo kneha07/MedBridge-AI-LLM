@@ -47,7 +47,7 @@ MedBridge is an LLM agent for clinic staff. It scans a payer's policy, analyzes 
 | **Tool order enforced in code** | `SequenceGuard` in `agent_runner.py` refuses a tool called before its prerequisites (the model gets an error naming the step to call instead), refuses a second `submit_authorization`, allows `draft_appeal` only after a denial, and nudges the model up to twice if it stops before all steps have run. Each refusal, nudge or unfinished run is recorded in the request's audit trail and shown live on the progress screen, next to the enforced order. A run that still ends with steps missing is shown as stopped, not as submitted. Tests: `backend/tests/test_sequence_guard.py`. |
 | **MCP server** | `python mcp_server.py` (in `backend/`) exposes policy search, patient-record analysis, the FHIR-shaped request builder and the appeal draft to MCP clients such as Claude Desktop. Submission and tracking are **not** exposed: they sit behind the approval gate in the web app, and an MCP client has no such gate. Tests: `backend/tests/test_mcp_server.py`. |
 | **History and audit trail** | Requests, steps and who-did-what are stored in SQLite (`backend/medbridge.db`). |
-| **Denial → appeal** | On a simulated denial the agent drafts an appeal citing the retrieved policy text. Appeals still need physician review. |
+| **Denial → appeal** | On a simulated denial the agent drafts an appeal citing the retrieved policy text. The therapy duration it quotes counts only therapy with recorded dates: a prescription with no stop date is left out, so the figure does not grow with the date (`documented_therapy` in `verticals/healthcare.py`, tests in `backend/tests/test_documented_therapy.py`). The result screen says at the top when the payer denied the request, and the draft can be copied or downloaded. Appeals still need physician review. |
 
 ### Policy documents (`backend/rag/corpus`)
 
@@ -206,7 +206,7 @@ The tools are `search_policy`, `list_sample_patients`, `load_sample_patient`, `i
 
 ```bash
 cd backend
-python -m pytest tests                                   # 56 unit tests: FHIR mock, FHIR upload, sign-in, roles, accounts, tool order, keyword ranking, MCP tools (no LLM calls)
+python -m pytest tests                                   # 61 unit tests: FHIR mock, FHIR upload, sign-in, roles, accounts, tool order, keyword ranking, MCP tools, therapy duration (no LLM calls)
 python -m eval.retrieval_eval                            # retrieval: Recall@k and MRR over 34 queries
 RAG_HYBRID=1 python -m eval.retrieval_eval               # the same with keyword + embedding search (experiment, see below)
 python -m eval.passage_eval                             # retrieval at passage level (does the chunk contain the answer)

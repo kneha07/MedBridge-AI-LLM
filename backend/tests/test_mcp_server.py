@@ -43,5 +43,5 @@ def test_appeal_draft_uses_the_record_and_needs_a_physician():
     loaded = mcp_server.load_sample_patient("sample-pt-8-weeks.json")
     draft = asyncio.run(mcp_server.draft_appeal("Test Patient", "MRI", "Aetna", loaded["patient_id"], "M54.50",
                                                 "Lumbar MRI after physical therapy"))
-    assert "Conservative therapy on record" in draft["appeal_letter_preview"]
+    assert "Conservative therapy with recorded dates" in draft["appeal_letter_preview"]
     assert "Physician" in draft["next_step"]
