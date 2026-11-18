@@ -1,12 +1,19 @@
-version: '3.8'
+# Development setup: backend on http://localhost:8000, frontend on http://localhost:5173.
+# Reads provider keys and settings from .env in the project root (see .env.example).
+# Before the first run, build the policy corpus and index inside the backend container:
+#   docker compose run --rm backend sh -c "pip install pymupdf && python -m rag.build_corpus && python -m rag.store && python -m mimic_loader"
 services:
   backend:
     build: ./backend
     ports:
       - "8000:8000"
-    environment:
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/app
   frontend:
     build: ./frontend
     ports:
       - "5173:5173"
+    depends_on:
+      - backend

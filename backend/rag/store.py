@@ -4,11 +4,14 @@ Documents come from rag/corpus/*.md|*.txt (public payer / CMS policy text, see
 rag/build_corpus.py). Each chunk keeps its source, payer and title so answers can cite them.
 """
 import hashlib
+import os
 import re
 from pathlib import Path
 
 import chromadb
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
+
+from rag.hybrid import BM25, rrf
 
 CORPUS_DIR = Path(__file__).parent / "corpus"
 DB_DIR = Path(__file__).parent / ".chroma"
@@ -16,6 +19,9 @@ COLLECTION = "policies"
 EMBED_MODEL = "all-MiniLM-L6-v2"
 CHUNK_WORDS = 160
 OVERLAP_WORDS = 30
+# Experiment, off by default: RAG_HYBRID=1 merges the embedding ranking with a keyword (BM25) ranking.
+HYBRID = os.environ.get("RAG_HYBRID", "0") == "1"
+HYBRID_DEPTH = 20  # candidates taken from each ranking before fusion
 
 _collection = None
 
@@ -114,13 +120,32 @@ def search(query: str, k: int = 4, payer: str | None = None) -> list[dict]:
         if payer is None:  # a payer we hold no documents for: never answer from another payer's policy
             return []
     where = {"payer": {"$in": [payer, "General"]}} if payer else None
+    if HYBRID:
+        return _hybrid_search(col, query, k, where)
     res = col.query(query_texts=[query], n_results=k, where=where)
-    hits = []
-    for text, meta, dist in zip(res["documents"][0], res["metadatas"][0], res["distances"][0]):
-        hits.append({"text": text, "source": meta.get("source"), "title": meta.get("title"),
-                     "payer": meta.get("payer"), "synthetic": meta.get("synthetic", False),
-                     "score": round(1 - dist, 3)})
-    return hits
+    return [_hit(text, meta, round(1 - dist, 3))
+            for text, meta, dist in zip(res["documents"][0], res["metadatas"][0], res["distances"][0])]
+
+
+def _hit(text: str, meta: dict, score: float) -> dict:
+    return {"text": text, "source": meta.get("source"), "title": meta.get("title"),
+            "payer": meta.get("payer"), "synthetic": meta.get("synthetic", False), "score": score}
+
+
+def _hybrid_search(col, query: str, k: int, where: dict | None) -> list[dict]:
+    """Embedding and keyword (BM25) rankings over the same payer-filtered chunks, merged by rank fusion.
+    `score` stays the embedding similarity, so a chunk found by its keywords can show a low score."""
+    pool = col.get(where=where, include=["documents", "metadatas"])
+    if not pool["ids"]:
+        return []
+    # The corpus is small, so the embedding query ranks every filtered chunk: each one then has a similarity.
+    res = col.query(query_texts=[query], n_results=len(pool["ids"]), where=where)
+    dense_ids = res["ids"][0]
+    similarity = {i: round(1 - d, 3) for i, d in zip(dense_ids, res["distances"][0])}
+    depth = max(HYBRID_DEPTH, k)
+    keyword_ids = [pool["ids"][i] for i in BM25(pool["documents"]).rank(query, depth)]
+    by_id = {i: (text, meta) for i, text, meta in zip(pool["ids"], pool["documents"], pool["metadatas"])}
+    return [_hit(*by_id[i], similarity.get(i, 0.0)) for i in rrf([dense_ids[:depth], keyword_ids])[:k]]
 
 
 if __name__ == "__main__":
