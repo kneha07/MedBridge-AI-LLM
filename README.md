@@ -44,7 +44,8 @@ MedBridge is an LLM agent for clinic staff. It scans a payer's policy, analyzes 
 | **Open patient data** | `analyze_medical_records` looks the patient up in the MIMIC-IV demo (SQLite) and reports diagnoses, procedures and analgesic/NSAID medications on record, with its limits. Synthea synthetic patients (optional, `python -m synthea_loader`) add the outpatient back-pain history MIMIC lacks: first back-pain diagnosis, back-pain visits, and weeks of conservative therapy from prescription and physical-therapy dates. |
 | **Upload a patient record** | Drop a FHIR R4 patient bundle (or pick one of three sample patients) on the request form. `fhir_import.py` turns it into the same record the Synthea loader builds, keeps it in server memory for two hours (never in the database), and fills the patient fields and diagnosis code. FHIR prescriptions carry no stop date, so a completed one counts as a single day rather than an invented duration. Checked against Synthea's own FHIR export: on the 89 back-pain patients whose histories agree between the CSV and FHIR runs, diagnoses, visits, therapy sessions, prescription dates and imaging match, and weeks of therapy are never higher than from the CSV. Tests: `backend/tests/test_fhir_import.py`. |
 | **Therapy timeline on the review screen** | For outpatient records, the review screen draws back-pain visits, therapy sessions, prescriptions and imaging on a timeline, with the duration the cited policy passage asks for (e.g. Aetna's "4 weeks of conservative therapy", read from the retrieved text, not hard-coded) and a checklist item comparing the two. |
-| **Tool order enforced in code** | `SequenceGuard` in `agent_runner.py` refuses a tool called before its prerequisites (the model gets an error naming the step to call instead), refuses a second `submit_authorization`, allows `draft_appeal` only after a denial, and nudges the model up to twice if it stops before all steps have run. Each refusal, nudge or unfinished run is recorded in the request's audit trail and shown live on the progress screen, next to the enforced order. Tests: `backend/tests/test_sequence_guard.py`. |
+| **Tool order enforced in code** | `SequenceGuard` in `agent_runner.py` refuses a tool called before its prerequisites (the model gets an error naming the step to call instead), refuses a second `submit_authorization`, allows `draft_appeal` only after a denial, and nudges the model up to twice if it stops before all steps have run. Each refusal, nudge or unfinished run is recorded in the request's audit trail and shown live on the progress screen, next to the enforced order. A run that still ends with steps missing is shown as stopped, not as submitted. Tests: `backend/tests/test_sequence_guard.py`. |
+| **MCP server** | `python mcp_server.py` (in `backend/`) exposes policy search, patient-record analysis, the FHIR-shaped request builder and the appeal draft to MCP clients such as Claude Desktop. Submission and tracking are **not** exposed: they sit behind the approval gate in the web app, and an MCP client has no such gate. Tests: `backend/tests/test_mcp_server.py`. |
 | **History and audit trail** | Requests, steps and who-did-what are stored in SQLite (`backend/medbridge.db`). |
 | **Denial → appeal** | On a simulated denial the agent drafts an appeal citing the retrieved policy text. Appeals still need physician review. |
 
@@ -184,11 +185,28 @@ Sign-in is on by default. Open http://localhost:5173 and use a demo account (`al
 
 Docker: `docker compose up --build` starts both services for development (the corpus, index and patient data still have to be built once; the command is at the top of `docker-compose.yml`). The Docker setup has not been run end to end since it was rewritten.
 
+### Use the tools from an MCP client
+
+Add this to the client's MCP configuration (for Claude Desktop, `claude_desktop_config.json`), with the paths of your checkout and virtual environment:
+
+```json
+{
+  "mcpServers": {
+    "medbridge": {
+      "command": "/path/to/MedBridge-AI-LLM/backend/venv/bin/python",
+      "args": ["/path/to/MedBridge-AI-LLM/backend/mcp_server.py"]
+    }
+  }
+}
+```
+
+The tools are `search_policy`, `list_sample_patients`, `load_sample_patient`, `import_fhir_bundle`, `analyze_patient_record`, `build_prior_auth_request` and `draft_appeal`. `search_policy` needs the corpus and index built (step 2 above). The server has been exercised through an in-process MCP client, not yet from Claude Desktop itself.
+
 ### Tests and evaluations
 
 ```bash
 cd backend
-python -m pytest tests                                   # 50 unit tests: FHIR mock, FHIR upload, sign-in, roles, accounts, tool order, keyword ranking (no LLM calls)
+python -m pytest tests                                   # 56 unit tests: FHIR mock, FHIR upload, sign-in, roles, accounts, tool order, keyword ranking, MCP tools (no LLM calls)
 python -m eval.retrieval_eval                            # retrieval: Recall@k and MRR over 34 queries
 RAG_HYBRID=1 python -m eval.retrieval_eval               # the same with keyword + embedding search (experiment, see below)
 python -m eval.passage_eval                             # retrieval at passage level (does the chunk contain the answer)
