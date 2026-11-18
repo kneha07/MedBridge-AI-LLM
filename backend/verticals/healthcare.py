@@ -178,6 +178,30 @@ def set_form_data(data: dict):
     _current_form_data.set(data)
 
 
+def documented_therapy(therapy: dict) -> dict:
+    """Weeks of conservative therapy covered by intervals with a recorded end date (union of intervals).
+    An open-ended prescription is left out: "no stop date" is not evidence the patient kept taking the drug,
+    and counting it up to today would make the figure grow every day. Mirrors frontend/timelineRules.js."""
+    from datetime import date
+    intervals = sorted([(t["start"], t["end"]) for t in therapy.get("therapy", []) if t.get("start") and t.get("end")]
+                       + [(m["start"], m["end"]) for m in therapy.get("medications", []) if m.get("start") and m.get("end")])
+    days, cur = 0, None
+    for start, end in intervals:
+        s, e = date.fromisoformat(start), date.fromisoformat(end)
+        if cur is None or s > cur[1]:
+            if cur:
+                days += (cur[1] - cur[0]).days
+            cur = [s, e]
+        else:
+            cur[1] = max(cur[1], e)
+    if cur:
+        days += (cur[1] - cur[0]).days
+    return {"weeks": round(days / 7, 1),
+            "start": intervals[0][0] if intervals else None,
+            "end": max(e for _, e in intervals) if intervals else None,
+            "open_ended_prescriptions": sum(1 for m in therapy.get("medications", []) if not m.get("end"))}
+
+
 def retrieve_policy_evidence(payer: str, treatment: str, diagnosis: str = "", k: int = 3, query: str | None = None) -> list[dict]:
     """RAG lookup of payer policy passages; returns [] if the vector store is unavailable."""
     try:
@@ -237,6 +261,8 @@ async def execute_tool(tool_name: str, tool_input: dict) -> dict:
                 first_back_pain_diagnosis_date=record["first_back_pain_diagnosis_date"],
                 back_pain_encounters=len(record["back_pain_encounters"]),
                 conservative_therapy={k: therapy[k] for k in ("start", "end", "total_weeks")},
+                # total_weeks runs open-ended prescriptions up to the record date; this one counts recorded dates only
+                conservative_therapy_with_recorded_dates=documented_therapy(therapy),
                 conservative_therapy_detail=therapy["medications"][:8]
                 + [{k: v for k, v in t.items() if k != "session_dates"} for t in therapy["therapy"]],
                 prior_imaging=record["prior_imaging"],
@@ -323,9 +349,12 @@ async def execute_tool(tool_name: str, tool_input: dict) -> dict:
         dx = "; ".join(f'{d["code"]} {d["title"]}' for d in diagnoses[:3]) or "not available"
         meds = ", ".join(record.get("conservative_therapy_medications", [])[:5]) or "none found in the available record"
         therapy = record.get("conservative_therapy") or {}
-        therapy_note = (f"Conservative therapy on record (from prescription and procedure dates): about "
-                        f"{therapy['total_weeks']:g} weeks between {therapy['start']} and {therapy['end']}. "
-                        if therapy.get("total_weeks") else "")
+        doc = documented_therapy(therapy) if therapy else {"weeks": 0}
+        therapy_note = (f"Conservative therapy with recorded dates (from prescription and procedure dates): about "
+                        f"{doc['weeks']:g} weeks between {doc['start']} and {doc['end']}. "
+                        + (f"{doc['open_ended_prescriptions']} prescription(s) with no stop date are not counted. "
+                           if doc["open_ended_prescriptions"] else "")
+                        if doc["weeks"] else "")
         letter = (f"Re: Appeal of Denial — {patient} — {treatment}\n\nDear Medical Director,\n\n"
                   f"We are appealing the denial (CO-50) of {treatment} for {patient}. Request: {(justification or 'see attached').rstrip('.')}. "
                   f"Diagnoses on record: {dx}. Analgesic, NSAID or muscle-relaxant medications on record: {meds}. "

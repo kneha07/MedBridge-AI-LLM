@@ -171,5 +171,8 @@ def test_server_records_guard_events_with_display_names(monkeypatch):
         assert "submit_authorization" not in refused["reason"]
         assert incomplete["missing"] == [healthcare.STEP_DISPLAY["track_authorization_status"][0]]
         assert [a["action"] for a in wf.audit if a["actor"] == "guard"] == ["guard_refused", "guard_incomplete"]
+        assert wf.status == WorkflowStatus.needs_info  # a run that stopped early is not reported as submitted
+        assert healthcare.STEP_DISPLAY["track_authorization_status"][0] in wf.result
+        assert wf.audit[-1]["action"] == "incomplete"
     finally:
         main.store.pop(wid, None)

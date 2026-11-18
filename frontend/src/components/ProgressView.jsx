@@ -51,8 +51,11 @@ function Step({ name, step, stopped, first, last, refused = 0 }) {
         </div>
         <div style={{ fontSize: 14.5, color: state === 'done' ? '#166534' : '#52525b', marginTop: 2 }}>{text}</div>
         {letter && (
-          <div style={{ marginTop: 12, padding: '14px 16px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, fontSize: 14.5, lineHeight: 1.6, color: '#27272a', whiteSpace: 'pre-wrap' }}>
-            <strong style={{ display: 'block', marginBottom: 6 }}>Draft appeal letter (needs physician review before it is sent)</strong>
+          <div id="appeal-letter" style={{ marginTop: 12, padding: '14px 16px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, fontSize: 14.5, lineHeight: 1.6, color: '#27272a', whiteSpace: 'pre-wrap', scrollMarginTop: 96 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 8 }}>
+              <strong>Draft appeal letter (needs physician review before it is sent)</strong>
+              <LetterActions letter={letter} />
+            </div>
             {letter}
             {step.data.supporting_evidence_attached && (
               <ul style={{ margin: '10px 0 0', paddingLeft: 20 }}>
@@ -138,6 +141,26 @@ function GuardPanel({ guard, byName, denied }) {
   );
 }
 
+// Copy or save the draft so a physician can finish it in their own editor.
+function LetterActions({ letter }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(letter); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch { /* clipboard blocked: the letter is still on screen */ }
+  };
+  const download = () => {
+    const url = URL.createObjectURL(new Blob([letter + '\n\nDRAFT. Needs physician review and signature before it is sent.\n'], { type: 'text/plain' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = 'appeal-letter-draft.txt'; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+  return (
+    <span style={{ display: 'inline-flex', gap: 8, whiteSpace: 'nowrap' }}>
+      <button type="button" className="pv-letter-btn" onClick={copy}><span role="status">{copied ? 'Copied' : 'Copy'}</span></button>
+      <button type="button" className="pv-letter-btn" onClick={download}>Download .txt</button>
+    </span>
+  );
+}
+
 const HEAD = {
   pending: ['clock', 'Preparing your request', 'MedBridge is checking the insurer\'s policy and the patient record.', '#18181b'],
   processing: ['clock', 'Preparing your request', 'MedBridge is checking the insurer\'s policy and the patient record.', '#18181b'],
@@ -149,9 +172,16 @@ const HEAD = {
 
 export default function ProgressView({ workflowData, onDecide, onStartNew, user }) {
   const status = workflowData?.status || 'pending';
-  const [icon, title, sub, color] = HEAD[status] || HEAD.pending;
   const steps = workflowData?.steps || [];
   const byName = Object.fromEntries(steps.map(s => [s.tool_name, s]));
+  // The request can be sent and still be denied: say so at the top instead of a plain green "submitted".
+  const decision = byName['Tracking Authorization']?.status === 'done' ? byName['Tracking Authorization'].data || {} : null;
+  const denied = status === 'submitted' && decision?.current_status === 'DENIED';
+  const appealReady = byName['Drafting Appeal Letter']?.status === 'done';
+  const [icon, title, sub, color] = denied
+    ? ['alert', appealReady ? 'Denied by the payer. Appeal drafted' : 'Denied by the payer',
+      appealReady ? 'The simulated payer denied the request. A draft appeal is ready for physician review.' : 'The simulated payer denied the request.', '#92400e']
+    : HEAD[status] || HEAD.pending;
   const names = STEP_ORDER.filter(n => byName[n] || (n !== 'Drafting Appeal Letter'));
   const stopped = status === 'needs_info' || status === 'rejected';
   const confirmation = byName['Submitting to Payer Portal']?.data?.confirmation_number;
@@ -159,7 +189,7 @@ export default function ProgressView({ workflowData, onDecide, onStartNew, user 
   const [copied, setCopied] = useState(false);
   const doneCount = names.filter(n => byName[n]?.status === 'done').length;
   const pct = status === 'submitted' ? 100 : Math.round((doneCount / names.length) * 100);
-  const tone = stopped ? 'grey' : status === 'awaiting_approval' ? 'amber' : status === 'submitted' ? 'green' : 'teal';
+  const tone = stopped ? 'grey' : status === 'awaiting_approval' || denied ? 'amber' : status === 'submitted' ? 'green' : 'teal';
   const barLabel = status === 'submitted' ? 'All steps done' : stopped ? `Stopped after ${doneCount} of ${names.length} steps` : status === 'awaiting_approval' ? `${doneCount} of ${names.length} steps done, waiting for you` : `${doneCount} of ${names.length} steps done`;
   const copy = async () => {
     try { await navigator.clipboard.writeText(confirmation); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch { /* clipboard blocked: the number is still on screen */ }
@@ -183,7 +213,7 @@ export default function ProgressView({ workflowData, onDecide, onStartNew, user 
       {status === 'awaiting_approval' && <ApprovalCard workflow={workflowData} onDecide={onDecide} user={user} />}
 
       {status === 'submitted' && (
-        <section aria-label="Submission summary" className="pv-confirm">
+        <section aria-label="Submission summary" className={`pv-confirm${denied ? ' denied' : ''}`}>
           <div style={{ fontSize: 14, color: '#52525b', fontWeight: 600 }}>Confirmation number <span style={{ color: '#92400e' }}>(simulated)</span></div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', margin: '4px 0 14px' }}>
             <div style={{ fontSize: 28, fontWeight: 800, fontFamily: 'ui-monospace, monospace', letterSpacing: 1, color: '#18181b' }}>{confirmation || '—'}</div>
@@ -194,6 +224,16 @@ export default function ProgressView({ workflowData, onDecide, onStartNew, user 
             <span><strong>Payer</strong> {f.insurance_provider}</span>
             <span><strong>Service</strong> {f.treatment_type}</span>
           </div>
+          {decision?.current_status && (
+            <div className="pv-outcome">
+              <span className={`pv-outcome-chip ${denied ? 'denied' : 'review'}`}>
+                <Icon name={denied ? 'alert' : 'clock'} size={15} />
+                Payer decision (simulated): {denied ? 'Denied' : decision.current_status}
+              </span>
+              {denied && decision.denial_reason && <span className="pv-outcome-note">{decision.denial_code ? `${decision.denial_code}: ` : ''}{decision.denial_reason}</span>}
+              {denied && appealReady && <a className="pv-outcome-link" href="#appeal-letter">Read the draft appeal <Icon name="arrow-right" size={14} /></a>}
+            </div>
+          )}
         </section>
       )}
 

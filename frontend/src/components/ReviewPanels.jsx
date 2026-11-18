@@ -154,7 +154,7 @@ export function ApprovalCard({ workflow, onDecide, user }) {
 const ACTION_LABELS = {
   created: 'Request created', started: 'Agent started', approval_requested: 'Review requested',
   approved: 'Approved', rejected_by_reviewer: 'Rejected', completed: 'Completed', rejected: 'Stopped (rejected)', error: 'Error',
-  guard_refused: 'Out-of-order call refused', guard_nudged: 'Model asked to finish the steps', guard_incomplete: 'Ended with steps missing',
+  guard_refused: 'Out-of-order call refused', guard_nudged: 'Model asked to finish the steps', guard_incomplete: 'Ended with steps missing', incomplete: 'Stopped: steps were missing',
 };
 
 export function AuditTrail({ audit }) {
@@ -192,12 +192,48 @@ function ago(iso) {
   return t.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-export function HistoryPanel({ items, onOpen }) {
+// Filter groups for the list: what a clinic lead scans for first.
+const HIST_FILTERS = [
+  ['all', 'All', () => true],
+  ['review', 'Needs review', h => h.status === 'awaiting_approval'],
+  ['active', 'In progress', h => h.status === 'pending' || h.status === 'processing'],
+  ['sent', 'Submitted', h => ['submitted', 'approved', 'denied'].includes(h.status)],
+  ['stopped', 'Stopped or rejected', h => h.status === 'needs_info' || h.status === 'rejected'],
+];
+
+export function HistoryPanel({ items: all, onOpen }) {
+  const [filter, setFilter] = useState('all');
+  const [query, setQuery] = useState('');
+  const q = query.trim().toLowerCase();
+  const matchesQuery = h => !q || [h.summary, h.insurance, h.treatment].some(v => String(v || '').toLowerCase().includes(q));
+  const test = HIST_FILTERS.find(f => f[0] === filter)[2];
+  const items = all.filter(h => test(h) && matchesQuery(h));
   return (
     <div style={{ maxWidth: 860, margin: '0 auto', padding: '28px 24px' }}>
       <h2 style={{ fontFamily: "'Source Serif 4', Georgia, serif", fontSize: 30, fontWeight: 800, letterSpacing: '-0.8px', color: '#18181b', margin: '0 0 6px' }}>Past requests</h2>
-      <p style={{ color: '#71717a', fontSize: 14.5, margin: '0 0 22px' }}>{items.length ? `${items.length} saved on the server, so they survive a refresh or restart.` : 'Saved on the server, so requests survive a refresh or restart.'}</p>
-      {items.length === 0 && (
+      <p style={{ color: '#71717a', fontSize: 14.5, margin: '0 0 18px' }}>{all.length ? `${all.length} saved on the server, so they survive a refresh or restart.` : 'Saved on the server, so requests survive a refresh or restart.'}</p>
+      {all.length > 0 && (
+        <div className="hist-tools">
+          <div className="hist-filters" role="group" aria-label="Filter by status">
+            {HIST_FILTERS.map(([id, label, fn]) => {
+              const n = all.filter(fn).length;
+              if (id !== 'all' && n === 0) return null;
+              return <button key={id} type="button" className="hist-filter" aria-pressed={filter === id} onClick={() => setFilter(id)}>{label}<b>{n}</b></button>;
+            })}
+          </div>
+          <label className="hist-search">
+            <Icon name="search" size={16} />
+            <span className="sr-only">Search past requests</span>
+            <input type="search" value={query} onChange={e => setQuery(e.target.value)} placeholder="Search patient, payer or service" />
+          </label>
+        </div>
+      )}
+      {all.length > 0 && items.length === 0 && (
+        <div role="status" style={{ ...panel, padding: '32px 24px', textAlign: 'center', color: '#52525b', fontSize: 15 }}>
+          No requests match. <button type="button" className="hist-reset" onClick={() => { setFilter('all'); setQuery(''); }}>Show all</button>
+        </div>
+      )}
+      {all.length === 0 && (
         <div style={{ ...panel, padding: '48px 24px', textAlign: 'center', color: '#52525b', display: 'grid', justifyItems: 'center', gap: 12 }}>
           <span className="hist-icon" style={{ width: 52, height: 52 }}><Icon name="clipboard" size={24} /></span>
           <strong style={{ color: '#18181b', fontSize: 17 }}>No requests yet</strong>

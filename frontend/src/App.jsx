@@ -144,13 +144,21 @@ export default function App() {
 
   const handleBack = () => { setView('select'); setVertical(null); setMode('home'); };
 
+  // Where the open request is: drafting (form and agent steps), waiting for review, or past the approval gate.
+  const status = workflowData?.status;
+  const stage = mode !== 'workflow' ? null
+    : view === 'form' || view === 'select' || !status ? 'draft'
+    : status === 'awaiting_approval' || status === 'rejected' ? 'review'
+    : status === 'submitted' || (workflowData?.steps || []).some(s => s.tool_name === 'Submitting to Payer Portal') ? 'submit'
+    : 'draft';
+
   if (authOn === null) return null;
   if (authOn && !user) return <SignIn expired={expired} demoAccounts={demoAccounts} minPassword={minPassword} onSignedIn={(u) => { setSession(u); setUser(u); setExpired(false); }} />;
 
   return (
     <div style={{ minHeight: '100vh' }}>
       <a href="#main" className="skip-link">Skip to main content</a>
-      <DemoHeader user={authOn ? user : null} onSignOut={signOut} onHome={() => setMode('home')} onReset={mode === 'workflow' && view !== 'select' ? handleReset : null} vertical={mode === 'workflow' ? vertical : null} />
+      <DemoHeader user={authOn ? user : null} onSignOut={signOut} onHome={() => setMode('home')} onReset={mode === 'workflow' && view !== 'select' ? handleReset : null} vertical={mode === 'workflow' ? vertical : null} stage={stage} />
 
       <nav className="nav-tabs" aria-label="Main">
         <div className="nav-tabs-inner" ref={tabsRef}>

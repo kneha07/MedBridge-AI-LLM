@@ -97,6 +97,8 @@ async def process_workflow(workflow_id: str, request: WorkflowRequest):
             text = text.replace(t, display(t))
         return text
 
+    unfinished: list[str] = []  # steps still missing when the model stopped (after the guard's nudges)
+
     def on_guard(event: dict):
         wf = store[workflow_id]
         shown = {**event, **({"tool": display(event["tool"])} if event.get("tool") else {}),
@@ -109,6 +111,8 @@ async def process_workflow(workflow_id: str, request: WorkflowRequest):
         note = {"refused": lambda e: f'{e["tool"]} refused: {e["reason"]}',
                 "nudged": lambda e: f'model stopped early; asked to finish {", ".join(e["missing"])}',
                 "incomplete": lambda e: f'run ended without {", ".join(e["missing"])}'}[event["kind"]](shown)
+        if event["kind"] == "incomplete":
+            unfinished.extend(shown.get("missing", []))
         log(wf, "guard", f'guard_{event["kind"]}', note)
 
     try:
@@ -116,9 +120,15 @@ async def process_workflow(workflow_id: str, request: WorkflowRequest):
                                  on_guard=on_guard)
         wf = store[workflow_id]
         rejected = workflow_id in approvals and not approvals[workflow_id]["approved"]
-        wf.status = WorkflowStatus.rejected if rejected else WorkflowStatus.submitted
+        if rejected:
+            wf.status, outcome = WorkflowStatus.rejected, "rejected"
+        elif unfinished:  # the model stopped early: do not report the request as submitted
+            wf.status, outcome = WorkflowStatus.needs_info, "incomplete"
+            result = f"The run ended before these steps were done: {', '.join(unfinished)}. Please resubmit.\n\n{result}"
+        else:
+            wf.status, outcome = WorkflowStatus.submitted, "completed"
         wf.result = result
-        log(wf, "agent", "rejected" if rejected else "completed")
+        log(wf, "agent", outcome)
     except Exception as e:
         wf = store[workflow_id]
         wf.status = WorkflowStatus.needs_info

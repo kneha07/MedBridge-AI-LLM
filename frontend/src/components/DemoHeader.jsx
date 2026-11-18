@@ -3,7 +3,9 @@ import { useState, useEffect } from 'react';
 import Logo from './Logo';
 import Icon from './Icon';
 
-export default function DemoHeader({ onReset, onHome, vertical, user, onSignOut }) {
+const STAGES = [['draft', 'Draft'], ['review', 'Review'], ['submit', 'Submit']];
+
+export default function DemoHeader({ onReset, onHome, vertical, user, onSignOut, stage = null }) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -56,11 +58,21 @@ export default function DemoHeader({ onReset, onHome, vertical, user, onSignOut 
         display: 'flex', alignItems: 'center', gap: '10px',
         fontSize: '13px',
       }}>
-        <span style={{ color: '#2dd4bf', fontWeight: '800' }}>Draft</span>
-        <span style={{ color: '#52525b' }}>·</span>
-        <span style={{ color: '#a1a1aa', fontWeight: '700' }}>Review</span>
-        <span style={{ color: '#52525b' }}>·</span>
-        <span style={{ color: '#a1a1aa', fontWeight: '700' }}>Submit</span>
+        {STAGES.map(([id, label], i) => {
+          const at = STAGES.findIndex(s => s[0] === stage);
+          const state = at < 0 ? 'idle' : i < at ? 'done' : i === at ? 'now' : 'next';
+          return (
+            <span key={id} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {i > 0 && <span aria-hidden="true" className={`hdr-stage-line ${state === 'done' || state === 'now' ? 'on' : ''}`} />}
+              <span className={`hdr-stage ${state}`} aria-current={state === 'now' ? 'step' : undefined}>
+                {state === 'done' && <Icon name="check" size={13} strokeWidth={3} />}
+                {state === 'now' && <i aria-hidden="true" />}
+                {label}
+                {state === 'done' && <span className="sr-only"> (done)</span>}
+              </span>
+            </span>
+          );
+        })}
       </div>
 
       {/* Right */}
